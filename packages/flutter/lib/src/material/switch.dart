@@ -573,28 +573,6 @@ class Switch extends StatelessWidget {
     }
   }
 
-  Widget _buildCupertinoSwitch(BuildContext context) {
-    final Size size = _getSwitchSize(context);
-    return Container(
-      width: size.width, // Same size as the Material switch.
-      height: size.height,
-      alignment: Alignment.center,
-      child: CupertinoSwitch(
-        dragStartBehavior: dragStartBehavior,
-        value: value,
-        onChanged: onChanged,
-        activeColor: activeColor,
-        trackColor: inactiveTrackColor,
-        thumbColor: thumbColor?.resolve(<MaterialState>{}),
-        applyTheme: applyCupertinoTheme,
-        focusColor: focusColor,
-        focusNode: focusNode,
-        onFocusChange: onFocusChange,
-        autofocus: autofocus,
-      ),
-    );
-  }
-
   Widget _buildMaterialSwitch(BuildContext context) {
     return _MaterialSwitch(
       value: value,
@@ -623,29 +601,13 @@ class Switch extends StatelessWidget {
       focusNode: focusNode,
       onFocusChange: onFocusChange,
       autofocus: autofocus,
+      switchType: _switchType,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    switch (_switchType) {
-      case _SwitchType.material:
-        return _buildMaterialSwitch(context);
-
-      case _SwitchType.adaptive: {
-        final ThemeData theme = Theme.of(context);
-        switch (theme.platform) {
-          case TargetPlatform.android:
-          case TargetPlatform.fuchsia:
-          case TargetPlatform.linux:
-          case TargetPlatform.windows:
-            return _buildMaterialSwitch(context);
-          case TargetPlatform.iOS:
-          case TargetPlatform.macOS:
-            return _buildCupertinoSwitch(context);
-        }
-      }
-    }
+    return _buildMaterialSwitch(context);
   }
 
   @override
@@ -661,6 +623,7 @@ class _MaterialSwitch extends StatefulWidget {
     required this.value,
     required this.onChanged,
     required this.size,
+    required this.switchType,
     this.activeColor,
     this.activeTrackColor,
     this.inactiveThumbColor,
@@ -713,6 +676,7 @@ class _MaterialSwitch extends StatefulWidget {
   final ValueChanged<bool>? onFocusChange;
   final bool autofocus;
   final Size size;
+  final _SwitchType switchType;
 
   @override
   State<StatefulWidget> createState() => _MaterialSwitchState();
@@ -728,15 +692,24 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
       // During a drag we may have modified the curve, reset it if its possible
       // to do without visual discontinuation.
       if (position.value == 0.0 || position.value == 1.0) {
-        if (Theme.of(context).useMaterial3) {
-          position
-            ..curve = Curves.easeOutBack
-            ..reverseCurve = Curves.easeOutBack.flipped;
-        } else {
-          position
-            ..curve = Curves.easeIn
-            ..reverseCurve = Curves.easeOut;
+        switch (widget.switchType) {
+          case _SwitchType.adaptive:
+            switch(Theme.of(context).platform) {
+              case TargetPlatform.android:
+              case TargetPlatform.fuchsia:
+              case TargetPlatform.linux:
+              case TargetPlatform.windows:
+                updateCurve();
+              case TargetPlatform.iOS:
+              case TargetPlatform.macOS:
+                position
+                  ..curve = const Cubic(0.175, 0.885, 0.32, 1.1)
+                  ..reverseCurve = const Cubic(0.175, 0.885, 0.32, 1.1).flipped;
+            }
+          case _SwitchType.material:
+            updateCurve();
         }
+
       }
       animateToValue();
     }
@@ -756,6 +729,18 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
 
   @override
   bool? get value => widget.value;
+
+  void updateCurve() {
+    if (Theme.of(context).useMaterial3) {
+      position
+        ..curve = Curves.easeOutBack
+        ..reverseCurve = Curves.easeOutBack.flipped;
+    } else {
+      position
+        ..curve = Curves.easeIn
+        ..reverseCurve = Curves.easeOut;
+    }
+  }
 
   MaterialStateProperty<Color?> get _widgetThumbColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
@@ -824,6 +809,8 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
     widget.onChanged?.call(value!);
   }
 
+  bool isCupertino = false;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -835,8 +822,29 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
 
     final ThemeData theme = Theme.of(context);
     final SwitchThemeData switchTheme = SwitchTheme.of(context);
-    final _SwitchConfig switchConfig = theme.useMaterial3 ? _SwitchConfigM3(context) : _SwitchConfigM2();
-    final SwitchThemeData defaults = theme.useMaterial3 ? _SwitchDefaultsM3(context) : _SwitchDefaultsM2(context);
+
+    _SwitchConfig switchConfig;
+    SwitchThemeData defaults;
+    switch (widget.switchType) {
+      case _SwitchType.material:
+        switchConfig = theme.useMaterial3 ? _SwitchConfigM3(context) : _SwitchConfigM2();
+        defaults = theme.useMaterial3 ? _SwitchDefaultsM3(context) : _SwitchDefaultsM2(context);
+      case _SwitchType.adaptive:
+        switch (theme.platform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+            switchConfig = theme.useMaterial3 ? _SwitchConfigM3(context) : _SwitchConfigM2();
+            defaults = theme.useMaterial3 ? _SwitchDefaultsM3(context) : _SwitchDefaultsM2(context);
+          case TargetPlatform.iOS:
+          case TargetPlatform.macOS:
+            isCupertino = true;
+            switchConfig = _SwitchConfigCupertino(context);
+            defaults = _SwitchDefaultsCupertino(context);
+            reactionController.duration = const Duration(milliseconds: 200);
+        }
+    }
 
     positionController.duration = Duration(milliseconds: switchConfig.toggleDuration);
 
@@ -862,6 +870,7 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
       ?? defaults.trackColor!.resolve(activeStates)!;
     final Color effectiveActiveTrackOutlineColor = widget.trackOutlineColor?.resolve(activeStates)
       ?? switchTheme.trackOutlineColor?.resolve(activeStates)
+      ?? defaults.trackOutlineColor!.resolve(activeStates)
       ?? Colors.transparent;
     final double? effectiveActiveTrackOutlineWidth = widget.trackOutlineWidth?.resolve(activeStates)
       ?? switchTheme.trackOutlineWidth?.resolve(activeStates)
@@ -988,7 +997,8 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
             ..iconTheme = IconTheme.of(context)
             ..thumbShadow = switchConfig.thumbShadow
             ..transitionalThumbSize = switchConfig.transitionalThumbSize
-            ..positionController = positionController,
+            ..positionController = positionController
+            ..isCupertino = isCupertino,
         ),
       ),
     );
@@ -1299,6 +1309,17 @@ class _SwitchPainter extends ToggleablePainter {
     notifyListeners();
   }
 
+  bool get isCupertino => _isCupertino!;
+  bool? _isCupertino;
+  set isCupertino(bool? value) {
+    assert(value != null);
+    if (value == _isCupertino) {
+      return;
+    }
+    _isCupertino = value;
+    notifyListeners();
+  }
+
   List<BoxShadow>? get thumbShadow => _thumbShadow;
   List<BoxShadow>? _thumbShadow;
   set thumbShadow(List<BoxShadow>? value) {
@@ -1339,6 +1360,7 @@ class _SwitchPainter extends ToggleablePainter {
   bool _stopPressAnimation = false;
   double? _pressedInactiveThumbRadius;
   double? _pressedActiveThumbRadius;
+  double? _pressedThumbExtention;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1360,6 +1382,7 @@ class _SwitchPainter extends ToggleablePainter {
     // To get the thumb radius when the press ends, the value can be any number
     // between activeThumbRadius/inactiveThumbRadius and pressedThumbRadius.
     if (!_stopPressAnimation) {
+      _pressedThumbExtention = isCupertino ? reaction.value * 7 : 0;
       if (reaction.isCompleted) {
         // This happens when the thumb is dragged instead of being tapped.
         _pressedInactiveThumbRadius = lerpDouble(inactiveThumbRadius, pressedThumbRadius, reaction.value);
@@ -1374,9 +1397,8 @@ class _SwitchPainter extends ToggleablePainter {
         _pressedInactiveThumbRadius = inactiveThumbRadius;
       }
     }
-
-    final Size inactiveThumbSize = Size.fromRadius(_pressedInactiveThumbRadius ?? inactiveThumbRadius);
-    final Size activeThumbSize = Size.fromRadius(_pressedActiveThumbRadius ?? activeThumbRadius);
+    final Size inactiveThumbSize = isCupertino ? Size(_pressedInactiveThumbRadius! * 2 + _pressedThumbExtention!, _pressedInactiveThumbRadius! * 2) : Size.fromRadius(_pressedInactiveThumbRadius ?? inactiveThumbRadius);
+    final Size activeThumbSize = isCupertino ? Size(_pressedActiveThumbRadius! * 2 + _pressedThumbExtention!, _pressedActiveThumbRadius! * 2) : Size.fromRadius(_pressedActiveThumbRadius ?? activeThumbRadius);
     Animation<Size> thumbSizeAnimation(bool isForward) {
       List<TweenSequenceItem<Size>> thumbSizeSequence;
       if (isForward) {
@@ -1418,20 +1440,32 @@ class _SwitchPainter extends ToggleablePainter {
       return TweenSequence<Size>(thumbSizeSequence).animate(positionController);
     }
 
-    Size thumbSize;
-    if (reaction.isCompleted) {
-      thumbSize = Size.fromRadius(pressedThumbRadius);
-    } else {
-      if (position.isDismissed || position.status == AnimationStatus.forward) {
-        thumbSize = thumbSizeAnimation(true).value;
+    Size? thumbSize;
+    if (isCupertino) {
+      if (reaction.isCompleted) {
+        thumbSize = Size(_pressedInactiveThumbRadius! * 2 + _pressedThumbExtention!, _pressedInactiveThumbRadius! * 2);
       } else {
-        thumbSize = thumbSizeAnimation(false).value;
+        if (position.isDismissed || position.status == AnimationStatus.forward) {
+          thumbSize = Size.lerp(inactiveThumbSize, activeThumbSize, position.value);
+        } else {
+          thumbSize = Size.lerp(inactiveThumbSize, activeThumbSize, position.value);
+        }
+      }
+    } else {
+      if (reaction.isCompleted) {
+        thumbSize = Size.fromRadius(pressedThumbRadius);
+      } else {
+        if (position.isDismissed || position.status == AnimationStatus.forward) {
+          thumbSize = thumbSizeAnimation(true).value;
+        } else {
+          thumbSize = thumbSizeAnimation(false).value;
+        }
       }
     }
 
     // The thumb contracts slightly during the animation in Material 2.
     final double inset = thumbOffset == null ? 0 : 1.0 - (currentValue - thumbOffset!).abs() * 2.0;
-    thumbSize = Size(thumbSize.width - inset, thumbSize.height - inset);
+    thumbSize = Size(thumbSize!.width - inset, thumbSize.height - inset);
 
     final double colorValue = CurvedAnimation(parent: positionController, curve: Curves.easeOut, reverseCurve: Curves.easeIn).value;
     final Color trackColor = Color.lerp(inactiveTrackColor, activeTrackColor, colorValue)!;
@@ -1480,6 +1514,7 @@ class _SwitchPainter extends ToggleablePainter {
       thumbSize,
       inset,
     );
+    // _paintFocusedTrackOutlineWith(canvas, paint, trackPaintOffset, trackOutlineColor, trackOutlineWidth);
   }
 
   /// Computes canvas offset for track's upper left corner
@@ -1498,10 +1533,11 @@ class _SwitchPainter extends ToggleablePainter {
     final double additionalThumbRadius = thumbSize.height / 2 - trackRadius;
     final double additionalRectWidth = (thumbSize.width - thumbSize.height) / 2;
 
-    final double horizontalProgress = visualPosition * trackInnerLength;
-    final double thumbHorizontalOffset = trackPaintOffset.dx - additionalThumbRadius - additionalRectWidth + horizontalProgress;
+    final double horizontalProgress = visualPosition * (trackInnerLength - _pressedThumbExtention!);
+    // final double thumbHorizontalOffset = trackPaintOffset.dx - additionalThumbRadius - additionalRectWidth + horizontalProgress;
+    // final double thumbVerticalOffset = trackPaintOffset.dy - additionalThumbRadius;
+    final double thumbHorizontalOffset = trackPaintOffset.dx + trackRadius + (_pressedThumbExtention! / 2) - thumbSize.width / 2 + horizontalProgress;
     final double thumbVerticalOffset = trackPaintOffset.dy - additionalThumbRadius;
-
     return Offset(thumbHorizontalOffset, thumbVerticalOffset);
   }
 
@@ -1521,17 +1557,22 @@ class _SwitchPainter extends ToggleablePainter {
     canvas.drawRRect(trackRRect, paint);
 
     if (trackOutlineColor != null) {
-      // paint track outline
-      final Rect outlineTrackRect = Rect.fromLTWH(
-        trackPaintOffset.dx + 1,
-        trackPaintOffset.dy + 1,
-        trackWidth - 2,
-        trackHeight - 2,
-      );
-      final RRect outlineTrackRRect = RRect.fromRectAndRadius(
-        outlineTrackRect,
-        Radius.circular(trackRadius),
-      );
+      final RRect outlineTrackRRect;
+      if (trackOutlineWidth == _kCupertinoFocusTrackOutline && isCupertino) {
+        outlineTrackRRect = trackRRect.inflate(1.75);
+      } else {
+        // paint track outline
+        final Rect outlineTrackRect = Rect.fromLTWH(
+          trackPaintOffset.dx + 1,
+          trackPaintOffset.dy + 1,
+          trackWidth - 2,
+          trackHeight - 2,
+        );
+        outlineTrackRRect = RRect.fromRectAndRadius(
+          outlineTrackRect,
+          Radius.circular(trackRadius),
+        );
+      }
       final Paint outlinePaint = Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = trackOutlineWidth ?? 2.0
@@ -1539,6 +1580,29 @@ class _SwitchPainter extends ToggleablePainter {
       canvas.drawRRect(outlineTrackRRect, outlinePaint);
     }
   }
+
+  void _paintFocusedTrackOutlineWith(Canvas canvas, Paint paint, Offset trackPaintOffset, Color? trackOutlineColor, double? trackOutlineWidth) {
+    final Rect trackRect = Rect.fromLTWH(
+      trackPaintOffset.dx,
+      trackPaintOffset.dy,
+      trackWidth,
+      trackHeight,
+    );
+    final double trackRadius = trackHeight / 2;
+    final RRect trackRRect = RRect.fromRectAndRadius(
+      trackRect,
+      Radius.circular(trackRadius),
+    );
+
+    final RRect outlineTrackRRect;
+    outlineTrackRRect = trackRRect.inflate(1.75);
+
+    final Paint outlinePaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = trackOutlineWidth ?? 2.0
+      ..color = trackOutlineColor!;
+    canvas.drawRRect(outlineTrackRRect, outlinePaint);
+    }
 
   void _paintThumbWith(
       Offset thumbPaintOffset,
@@ -1727,7 +1791,7 @@ class _SwitchDefaultsM2 extends SwitchThemeData {
   }
 
   @override
-  MaterialStateProperty<Color?>? get trackOutlineColor => null;
+  MaterialStateProperty<Color?>? get trackOutlineColor => const MaterialStatePropertyAll<Color>(Colors.transparent);
 
   @override
   MaterialTapTargetSize get materialTapTargetSize => _theme.materialTapTargetSize;
@@ -1972,3 +2036,174 @@ class _SwitchConfigM3 with _SwitchConfig {
 }
 
 // END GENERATED TOKEN PROPERTIES - Switch
+
+// Hand coded defaults for iOS/macOS Switch
+class _SwitchDefaultsCupertino extends SwitchThemeData {
+  _SwitchDefaultsCupertino(this.context);
+
+  final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+
+  @override
+  MaterialStateProperty<MouseCursor?> get mouseCursor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return MouseCursor.defer;
+      }
+      if (kIsWeb) {
+        return SystemMouseCursors.click;
+      }
+      return MouseCursor.defer;
+    });
+  }
+
+  @override
+  MaterialStateProperty<Color> get thumbColor => const MaterialStatePropertyAll<Color>(Colors.white);
+
+  @override
+  MaterialStateProperty<Color> get trackColor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        if (states.contains(MaterialState.selected)) {
+          return Color.fromARGB(255, 52, 199, 89).withOpacity(0.5);
+        }
+        return Color.fromARGB(20, 120, 120, 128);
+      }
+      if (states.contains(MaterialState.selected)) {
+        return Color.fromARGB(255, 52, 199, 89);
+      }
+      return Color.fromARGB(40, 120, 120, 128);
+    });
+  }
+
+  @override
+  MaterialStateProperty<Color?> get trackOutlineColor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.focused)) {
+        return HSLColor
+          .fromColor(Color.fromARGB(255, 52, 199, 89).withOpacity(0.80))
+          .withLightness(0.69).withSaturation(0.835)
+          .toColor();
+      }
+      return Colors.transparent;
+    });
+  }
+
+  @override
+  MaterialStateProperty<Color?> get overlayColor => const MaterialStatePropertyAll<Color>(Colors.transparent);
+
+  @override
+  MaterialStateProperty<double> get trackOutlineWidth {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.focused)) {
+        return _kCupertinoFocusTrackOutline;
+      }
+      return 0.0;
+    });
+  }
+
+  @override
+  double get splashRadius => 0.0;
+}
+
+const double _kCupertinoFocusTrackOutline = 3.5;
+
+class _SwitchConfigCupertino with _SwitchConfig {
+  _SwitchConfigCupertino(this.context)
+    : _colors = Theme.of(context).colorScheme;
+
+  BuildContext context;
+  final ColorScheme _colors;
+
+  @override
+  MaterialStateProperty<Color> get iconColor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        if (states.contains(MaterialState.selected)) {
+          return _colors.onSurface.withOpacity(0.38);
+        }
+        return _colors.surfaceVariant.withOpacity(0.38);
+      }
+      if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.onPrimaryContainer;
+        }
+        if (states.contains(MaterialState.hovered)) {
+          return _colors.onPrimaryContainer;
+        }
+        if (states.contains(MaterialState.focused)) {
+          return _colors.onPrimaryContainer;
+        }
+        return _colors.onPrimaryContainer;
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.surfaceVariant;
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return _colors.surfaceVariant;
+      }
+      if (states.contains(MaterialState.focused)) {
+        return _colors.surfaceVariant;
+      }
+      return _colors.surfaceVariant;
+    });
+  }
+
+  @override
+  double get activeThumbRadius => 13.5;
+
+  @override
+  double get inactiveThumbRadius => 13.5;
+
+  @override
+  double get pressedThumbRadius => 13.5;
+
+  @override
+  double get switchHeight => 39.0;
+
+  @override
+  double get switchHeightCollapsed => 39.0;
+
+  @override
+  double get switchWidth => 59.0;
+
+  @override
+  double get thumbRadiusWithIcon => 13.5;
+
+  @override
+  List<BoxShadow>? get thumbShadow => const <BoxShadow> [
+    BoxShadow(
+      color: Color(0x26000000),
+      offset: Offset(0, 3),
+      blurRadius: 8.0,
+    ),
+    BoxShadow(
+      color: Color(0x29000000),
+      offset: Offset(0, 1),
+      blurRadius: 1.0,
+    ),
+    BoxShadow(
+      color: Color(0x1A000000),
+      offset: Offset(0, 3),
+      blurRadius: 1.0,
+    ),
+  ];
+
+  @override
+  double get trackHeight => 31.0;
+
+  @override
+  double get trackWidth => 51.0;
+
+  // The thumb size at the middle of the track. Hand coded default based on the animation specs.
+  @override
+  Size get transitionalThumbSize => const Size(28.0, 28.0);
+
+  // Hand coded default based on the animation specs.
+  @override
+  int get toggleDuration => 200;
+
+  // Hand coded default based on the animation specs.
+  @override
+  double? get thumbOffset => null;
+}

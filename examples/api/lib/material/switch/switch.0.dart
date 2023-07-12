@@ -37,16 +37,42 @@ class _SwitchExampleState extends State<SwitchExample> {
 
   @override
   Widget build(BuildContext context) {
-    return Switch(
-      // This bool value toggles the switch.
-      value: light,
-      activeColor: Colors.red,
-      onChanged: (bool value) {
-        // This is called when the user toggles the switch.
-        setState(() {
-          light = value;
-        });
-      },
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Switch.adaptive(
+          autofocus: true,
+          // This bool value toggles the switch.
+          value: light,
+          onChanged: (bool value) {
+            // This is called when the user toggles the switch.
+            setState(() {
+              light = value;
+            });
+          },
+        ),
+        Switch.adaptive(
+          // This bool value toggles the switch.
+          value: light,
+          onChanged: (bool value) {
+            // This is called when the user toggles the switch.
+            setState(() {
+              light = value;
+            });
+          },
+        ),
+        Switch.adaptive(
+          // This bool value toggles the switch.
+          value: light,
+          onChanged: null,
+          // onChanged: (bool value) {
+          //   // This is called when the user toggles the switch.
+          //   setState(() {
+          //     light = value;
+          //   });
+          // },
+        ),
+      ],
     );
   }
 }
