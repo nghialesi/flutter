@@ -2172,19 +2172,21 @@ class _SwitchConfigCupertino with _SwitchConfig {
 
   @override
   List<BoxShadow>? get thumbShadow => const <BoxShadow> [
-    BoxShadow(
-      color: Color(0x26000000),
-      offset: Offset(0, 3),
-      blurRadius: 8.0,
-    ),
-    BoxShadow(
-      color: Color(0x29000000),
-      offset: Offset(0, 1),
-      blurRadius: 1.0,
-    ),
+    // These values are coming from CupertinoSwitch, but commenting the first two
+    // `BoxShadow`s can make Switches look more like the Switches on iOS simulator.
+    // BoxShadow(
+    //   color: Color(0x26000000),
+    //   offset: Offset(0, 3),
+    //   blurRadius: 5.0,
+    // ),
+    // BoxShadow(
+    //   color: Color(0x29000000),
+    //   offset: Offset(0, 1),
+    //   blurRadius: 1.0,
+    // ),
     BoxShadow(
       color: Color(0x1A000000),
-      offset: Offset(0, 3),
+      offset: Offset(0, 2),
       blurRadius: 1.0,
     ),
   ];
