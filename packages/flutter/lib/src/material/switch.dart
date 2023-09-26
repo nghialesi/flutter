@@ -573,7 +573,8 @@ class Switch extends StatelessWidget {
     }
   }
 
-  Widget _buildMaterialSwitch(BuildContext context) {
+  @override
+  Widget build(BuildContext context) {
     return _MaterialSwitch(
       value: value,
       onChanged: onChanged,
@@ -603,11 +604,6 @@ class Switch extends StatelessWidget {
       autofocus: autofocus,
       switchType: _switchType,
     );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _buildMaterialSwitch(context);
   }
 
   @override
@@ -647,8 +643,8 @@ class _MaterialSwitch extends StatefulWidget {
     this.focusNode,
     this.onFocusChange,
     this.autofocus = false,
-  })  : assert(activeThumbImage != null || onActiveThumbImageError == null),
-        assert(inactiveThumbImage != null || onInactiveThumbImageError == null);
+  }) : assert(activeThumbImage != null || onActiveThumbImageError == null),
+       assert(inactiveThumbImage != null || onInactiveThumbImageError == null);
 
   final bool value;
   final ValueChanged<bool>? onChanged;
@@ -702,9 +698,7 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
                 updateCurve();
               case TargetPlatform.iOS:
               case TargetPlatform.macOS:
-                position
-                  ..curve = const Cubic(0.175, 0.885, 0.32, 1.1)
-                  ..reverseCurve = const Cubic(0.175, 0.885, 0.32, 1.1).flipped;
+                position.curve = Curves.linear;
             }
           case _SwitchType.material:
             updateCurve();
