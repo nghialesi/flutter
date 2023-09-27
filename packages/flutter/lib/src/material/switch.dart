@@ -872,6 +872,12 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
       ?? defaults.trackColor!.resolve(activeStates)!;
     final Color effectiveActiveTrackOutlineColor = widget.trackOutlineColor?.resolve(activeStates)
       ?? switchTheme.trackOutlineColor?.resolve(activeStates)
+      ?? (applyCupertinoTheme
+        ? HSLColor
+          .fromColor(cupertinoPrimaryColor.withOpacity(0.80))
+          .withLightness(0.69).withSaturation(0.835)
+          .toColor()
+        : null)
       ?? defaults.trackOutlineColor!.resolve(activeStates)
       ?? Colors.transparent;
     final double? effectiveActiveTrackOutlineWidth = widget.trackOutlineWidth?.resolve(activeStates)
@@ -1516,7 +1522,6 @@ class _SwitchPainter extends ToggleablePainter {
       thumbSize,
       inset,
     );
-    // _paintFocusedTrackOutlineWith(canvas, paint, trackPaintOffset, trackOutlineColor, trackOutlineWidth);
   }
 
   /// Computes canvas offset for track's upper left corner
@@ -1533,11 +1538,8 @@ class _SwitchPainter extends ToggleablePainter {
     // How much thumb radius extends beyond the track
     final double trackRadius = trackHeight / 2;
     final double additionalThumbRadius = thumbSize.height / 2 - trackRadius;
-    // final double additionalRectWidth = (thumbSize.width - thumbSize.height) / 2;
 
     final double horizontalProgress = visualPosition * (trackInnerLength - _pressedThumbExtension!);
-    // final double thumbHorizontalOffset = trackPaintOffset.dx - additionalThumbRadius - additionalRectWidth + horizontalProgress;
-    // final double thumbVerticalOffset = trackPaintOffset.dy - additionalThumbRadius;
     final double thumbHorizontalOffset = trackPaintOffset.dx + trackRadius + (_pressedThumbExtension! / 2) - thumbSize.width / 2 + horizontalProgress;
     final double thumbVerticalOffset = trackPaintOffset.dy - additionalThumbRadius;
     return Offset(thumbHorizontalOffset, thumbVerticalOffset);
@@ -1581,30 +1583,10 @@ class _SwitchPainter extends ToggleablePainter {
         ..color = trackOutlineColor;
       canvas.drawRRect(outlineTrackRRect, outlinePaint);
     }
+    if (isCupertino) {
+      canvas.clipRRect(trackRRect);
+    }
   }
-
-  // void _paintFocusedTrackOutlineWith(Canvas canvas, Paint paint, Offset trackPaintOffset, Color? trackOutlineColor, double? trackOutlineWidth) {
-  //   final Rect trackRect = Rect.fromLTWH(
-  //     trackPaintOffset.dx,
-  //     trackPaintOffset.dy,
-  //     trackWidth,
-  //     trackHeight,
-  //   );
-  //   final double trackRadius = trackHeight / 2;
-  //   final RRect trackRRect = RRect.fromRectAndRadius(
-  //     trackRect,
-  //     Radius.circular(trackRadius),
-  //   );
-  //
-  //   final RRect outlineTrackRRect;
-  //   outlineTrackRRect = trackRRect.inflate(1.75);
-  //
-  //   final Paint outlinePaint = Paint()
-  //     ..style = PaintingStyle.stroke
-  //     ..strokeWidth = trackOutlineWidth ?? 2.0
-  //     ..color = trackOutlineColor!;
-  //   canvas.drawRRect(outlineTrackRRect, outlinePaint);
-  //   }
 
   void _paintThumbWith(
       Offset thumbPaintOffset,
@@ -2041,10 +2023,10 @@ class _SwitchConfigM3 with _SwitchConfig {
 
 // Hand coded defaults for iOS/macOS Switch
 class _SwitchDefaultsCupertino extends SwitchThemeData {
-  const _SwitchDefaultsCupertino(this.context);
+  _SwitchDefaultsCupertino(this.context);
 
   final BuildContext context;
-  // late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
   @override
   MaterialStateProperty<MouseCursor?> get mouseCursor {
@@ -2067,14 +2049,18 @@ class _SwitchDefaultsCupertino extends SwitchThemeData {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         if (states.contains(MaterialState.selected)) {
-          return const Color.fromARGB(255, 52, 199, 89).withOpacity(0.5);
+          return isDark
+            ? const Color.fromARGB(255, 48, 209, 88).withOpacity(0.5)
+            : const Color.fromARGB(255, 52, 199, 89).withOpacity(0.5);
         }
-        return const Color.fromARGB(20, 120, 120, 128);
+        return CupertinoColors.secondarySystemFill.withAlpha(20);
       }
       if (states.contains(MaterialState.selected)) {
-        return const Color.fromARGB(255, 52, 199, 89);
+        return isDark
+          ? const Color.fromARGB(255, 48, 209, 88)
+          : const Color.fromARGB(255, 52, 199, 89);
       }
-      return const Color.fromARGB(40, 120, 120, 128);
+      return CupertinoColors.secondarySystemFill;
     });
   }
 
@@ -2174,21 +2160,14 @@ class _SwitchConfigCupertino with _SwitchConfig {
 
   @override
   List<BoxShadow>? get thumbShadow => const <BoxShadow> [
-    // These values are coming from CupertinoSwitch, but commenting the first two
-    // `BoxShadow`s can make Switches look more like the Switches on iOS simulator.
-    // BoxShadow(
-    //   color: Color(0x26000000),
-    //   offset: Offset(0, 3),
-    //   blurRadius: 5.0,
-    // ),
-    // BoxShadow(
-    //   color: Color(0x29000000),
-    //   offset: Offset(0, 1),
-    //   blurRadius: 1.0,
-    // ),
     BoxShadow(
-      color: Color(0x1A000000),
-      offset: Offset(0, 2),
+      color: Color(0x26000000),
+      offset: Offset(0, 3),
+      blurRadius: 5.0,
+    ),
+    BoxShadow(
+      color: Color(0x29000000),
+      offset: Offset(0, 1),
       blurRadius: 1.0,
     ),
   ];
