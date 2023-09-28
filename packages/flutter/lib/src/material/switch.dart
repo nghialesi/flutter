@@ -134,15 +134,10 @@ class Switch extends StatelessWidget {
   /// or macOS, following Material design's
   /// [Cross-platform guidelines](https://material.io/design/platform-guidance/cross-platform-adaptation.html).
   ///
-  /// On iOS and macOS, this constructor creates a [CupertinoSwitch], which has
-  /// matching functionality and presentation as Material switches, and are the
+  /// On iOS and macOS, this constructor creates a [Switch] which has matching
+  /// functionality and presentation as Material switches, and are the
   /// graphics expected on iOS. On other platforms, this creates a Material
   /// design [Switch].
-  ///
-  /// If a [CupertinoSwitch] is created, the following parameters are ignored:
-  /// [activeTrackColor], [inactiveThumbColor], [inactiveTrackColor], [trackOutlineWidth]
-  /// [activeThumbImage], [onActiveThumbImageError], [inactiveThumbImage],
-  /// [onInactiveThumbImageError], [materialTapTargetSize].
   ///
   /// The target platform is based on the current [Theme]: [ThemeData.platform].
   const Switch.adaptive({
@@ -220,8 +215,6 @@ class Switch extends StatelessWidget {
   ///
   /// Defaults to [ColorScheme.secondary] with the opacity set at 50%.
   ///
-  /// Ignored if this switch is created with [Switch.adaptive].
-  ///
   /// If [trackColor] returns a non-null color in the [MaterialState.selected]
   /// state, it will be used instead of this color.
   final Color? activeTrackColor;
@@ -231,8 +224,6 @@ class Switch extends StatelessWidget {
   /// {@endtemplate}
   ///
   /// Defaults to the colors described in the Material design specification.
-  ///
-  /// Ignored if this switch is created with [Switch.adaptive].
   ///
   /// If [thumbColor] returns a non-null color in the default state, it will be
   /// used instead of this color.
@@ -244,8 +235,6 @@ class Switch extends StatelessWidget {
   ///
   /// Defaults to the colors described in the Material design specification.
   ///
-  /// Ignored if this switch is created with [Switch.adaptive].
-  ///
   /// If [trackColor] returns a non-null color in the default state, it will be
   /// used instead of this color.
   final Color? inactiveTrackColor;
@@ -254,7 +243,6 @@ class Switch extends StatelessWidget {
   /// An image to use on the thumb of this switch when the switch is on.
   /// {@endtemplate}
   ///
-  /// Ignored if this switch is created with [Switch.adaptive].
   final ImageProvider? activeThumbImage;
 
   /// {@template flutter.material.switch.onActiveThumbImageError}
@@ -267,7 +255,6 @@ class Switch extends StatelessWidget {
   /// An image to use on the thumb of this switch when the switch is off.
   /// {@endtemplate}
   ///
-  /// Ignored if this switch is created with [Switch.adaptive].
   final ImageProvider? inactiveThumbImage;
 
   /// {@template flutter.material.switch.onInactiveThumbImageError}
@@ -701,7 +688,9 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
                 updateCurve();
               case TargetPlatform.iOS:
               case TargetPlatform.macOS:
-                position.curve = Curves.linear;
+                position
+                  ..curve = Curves.linear
+                  ..reverseCurve = Curves.linear;
             }
           case _SwitchType.material:
             updateCurve();
@@ -2176,9 +2165,9 @@ class _SwitchConfigCupertino with _SwitchConfig {
   @override
   Size get transitionalThumbSize => const Size(28.0, 28.0);
 
-  // Hand coded default based on the animation specs.
+  // Hand coded default by comparing with [CupertinoSwitch].
   @override
-  int get toggleDuration => 200;
+  int get toggleDuration => 140;
 
   // Hand coded default based on the animation specs.
   @override
