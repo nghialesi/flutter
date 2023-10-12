@@ -764,7 +764,26 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
     });
   }
 
-  double get _trackInnerLength => widget.size.width - _kSwitchMinSize;
+  double get _trackInnerLength {
+    switch (widget.switchType) {
+      case _SwitchType.adaptive:
+        switch(Theme.of(context).platform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+            return widget.size.width - _kSwitchMinSize;
+          case TargetPlatform.iOS:
+          case TargetPlatform.macOS:
+            final double trackInnerStart = widget.size.height / 2.0;
+            final double trackInnerEnd = widget.size.width - trackInnerStart;
+            final double trackInnerLength = trackInnerEnd - trackInnerStart;
+            return trackInnerLength;
+        }
+      case _SwitchType.material:
+        return widget.size.width - _kSwitchMinSize;
+    }
+  }
 
   void _handleDragStart(DragStartDetails details) {
     if (isInteractive) {
@@ -2186,7 +2205,7 @@ class _SwitchConfigCupertino with _SwitchConfig {
   double get trackHeight => 31.0;
 
   @override
-  double get trackWidth => 52.0;
+  double get trackWidth => 51.0;
 
   // The thumb size at the middle of the track. Hand coded default based on the animation specs.
   @override
