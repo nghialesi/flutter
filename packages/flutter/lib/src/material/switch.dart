@@ -547,7 +547,22 @@ class Switch extends StatelessWidget {
   Size _getSwitchSize(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final SwitchThemeData switchTheme = SwitchTheme.of(context);
-    final _SwitchConfig switchConfig = theme.useMaterial3 ? _SwitchConfigM3(context) : _SwitchConfigM2();
+    final _SwitchConfig switchConfig;
+    switch (_switchType) {
+      case _SwitchType.material:
+        switchConfig = theme.useMaterial3 ? _SwitchConfigM3(context) : _SwitchConfigM2();
+      case _SwitchType.adaptive:
+        switch (theme.platform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+            switchConfig = theme.useMaterial3 ? _SwitchConfigM3(context) : _SwitchConfigM2();
+          case TargetPlatform.iOS:
+          case TargetPlatform.macOS:
+            switchConfig = _SwitchConfigCupertino(context);
+        }
+    }
 
     final MaterialTapTargetSize effectiveMaterialTapTargetSize = materialTapTargetSize
       ?? switchTheme.materialTapTargetSize
@@ -2151,7 +2166,7 @@ class _SwitchConfigCupertino with _SwitchConfig {
   double get switchWidth => 59.0;
 
   @override
-  double get thumbRadiusWithIcon => 13.5;
+  double get thumbRadiusWithIcon => 14.0;
 
   @override
   List<BoxShadow>? get thumbShadow => const <BoxShadow> [
@@ -2171,7 +2186,7 @@ class _SwitchConfigCupertino with _SwitchConfig {
   double get trackHeight => 31.0;
 
   @override
-  double get trackWidth => 51.0;
+  double get trackWidth => 52.0;
 
   // The thumb size at the middle of the track. Hand coded default based on the animation specs.
   @override
