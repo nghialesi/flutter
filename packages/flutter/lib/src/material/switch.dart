@@ -1383,7 +1383,14 @@ class _SwitchPainter extends ToggleablePainter {
     return ShapeDecoration(
       color: color,
       image: image == null ? null : DecorationImage(image: image, onError: errorListener),
-      shape: const StadiumBorder(),
+      shape: StadiumBorder(
+        side: isCupertino
+          ? const BorderSide(
+            width: 0.5,
+            color: Color(0x0A000000),
+            strokeAlign: 0.5
+          ) : BorderSide.none,
+      ),
       shadows: thumbShadow,
     );
   }
