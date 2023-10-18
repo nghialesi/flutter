@@ -775,8 +775,9 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
             return widget.size.width - _kSwitchMinSize;
           case TargetPlatform.iOS:
           case TargetPlatform.macOS:
-            final double trackInnerStart = widget.size.height / 2.0;
-            final double trackInnerEnd = widget.size.width - trackInnerStart;
+            final _SwitchConfig config = _SwitchConfigCupertino(context);
+            final double trackInnerStart = config.trackHeight / 2.0;
+            final double trackInnerEnd = config.trackWidth - trackInnerStart;
             final double trackInnerLength = trackInnerEnd - trackInnerStart;
             return trackInnerLength;
         }
