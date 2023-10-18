@@ -73,6 +73,9 @@ export 'package:flutter/services.dart' show Brightness;
 // Examples can assume:
 // late BuildContext context;
 
+///
+typedef AdaptiveThemeCallback<Object> = Object Function(ThemeData theme, Type t, Object defaultValue);
+
 /// An interface that defines custom additions to a [ThemeData] object.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=8-szcYzFVao}
@@ -334,6 +337,7 @@ class ThemeData with Diagnosticable {
     TimePickerThemeData? timePickerTheme,
     ToggleButtonsThemeData? toggleButtonsTheme,
     TooltipThemeData? tooltipTheme,
+    AdaptiveThemeCallback<Object>? adaptiveThemeCallback,
     // DEPRECATED (newest deprecations at the bottom)
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
@@ -630,6 +634,7 @@ class ThemeData with Diagnosticable {
       timePickerTheme: timePickerTheme,
       toggleButtonsTheme: toggleButtonsTheme,
       tooltipTheme: tooltipTheme,
+      adaptiveThemeCallback: adaptiveThemeCallback,
       // DEPRECATED (newest deprecations at the bottom)
       toggleableActiveColor: toggleableActiveColor,
       selectedRowColor: selectedRowColor,
@@ -740,6 +745,7 @@ class ThemeData with Diagnosticable {
     required this.timePickerTheme,
     required this.toggleButtonsTheme,
     required this.tooltipTheme,
+    this.adaptiveThemeCallback,
     // DEPRECATED (newest deprecations at the bottom)
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
@@ -865,6 +871,24 @@ class ThemeData with Diagnosticable {
   /// Most applications would use [Theme.of], which provides correct localized
   /// text geometry.
   factory ThemeData.fallback({bool? useMaterial3}) => ThemeData.light(useMaterial3: useMaterial3);
+
+  ///
+  Object adaptive(Type t, Object defaultValue) {
+    if (adaptiveThemeCallback != null) {
+      return adaptiveThemeCallback!(this, t, defaultValue);
+    }
+    return _defaultAdaptiveThemeCallback(this, t, defaultValue);
+  }
+
+  ///
+  Object _defaultAdaptiveThemeCallback(ThemeData theme, Type t, Object defaultValue) {
+    switch (t) {
+      case const (SwitchThemeData):
+        return const SwitchThemeData();
+      default:
+        return defaultValue;
+    }
+  }
 
   /// The overall theme brightness.
   ///
@@ -1434,6 +1458,9 @@ class ThemeData with Diagnosticable {
   /// This is the value returned from [TooltipTheme.of].
   final TooltipThemeData tooltipTheme;
 
+  ///
+  final AdaptiveThemeCallback<Object>? adaptiveThemeCallback;
+
   // DEPRECATED (newest deprecations at the bottom)
 
   /// Obsolete property that was used for input validation errors, e.g. in
@@ -1562,6 +1589,7 @@ class ThemeData with Diagnosticable {
     TimePickerThemeData? timePickerTheme,
     ToggleButtonsThemeData? toggleButtonsTheme,
     TooltipThemeData? tooltipTheme,
+    AdaptiveThemeCallback<Object>? adaptiveThemeCallback,
     // DEPRECATED (newest deprecations at the bottom)
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
@@ -1693,6 +1721,7 @@ class ThemeData with Diagnosticable {
       timePickerTheme: timePickerTheme ?? this.timePickerTheme,
       toggleButtonsTheme: toggleButtonsTheme ?? this.toggleButtonsTheme,
       tooltipTheme: tooltipTheme ?? this.tooltipTheme,
+      adaptiveThemeCallback: adaptiveThemeCallback ?? this.adaptiveThemeCallback,
       // DEPRECATED (newest deprecations at the bottom)
       toggleableActiveColor: toggleableActiveColor ?? _toggleableActiveColor,
       selectedRowColor: selectedRowColor ?? _selectedRowColor,
@@ -1891,6 +1920,7 @@ class ThemeData with Diagnosticable {
       timePickerTheme: TimePickerThemeData.lerp(a.timePickerTheme, b.timePickerTheme, t),
       toggleButtonsTheme: ToggleButtonsThemeData.lerp(a.toggleButtonsTheme, b.toggleButtonsTheme, t)!,
       tooltipTheme: TooltipThemeData.lerp(a.tooltipTheme, b.tooltipTheme, t)!,
+      adaptiveThemeCallback: t < 0.5 ? a.adaptiveThemeCallback : b.adaptiveThemeCallback,
       // DEPRECATED (newest deprecations at the bottom)
       toggleableActiveColor: Color.lerp(a.toggleableActiveColor, b.toggleableActiveColor, t),
       selectedRowColor: Color.lerp(a.selectedRowColor, b.selectedRowColor, t),

@@ -546,21 +546,21 @@ class Switch extends StatelessWidget {
 
   Size _getSwitchSize(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final SwitchThemeData switchTheme = SwitchTheme.of(context);
-    final _SwitchConfig switchConfig;
+    SwitchThemeData switchTheme = SwitchTheme.of(context);
+    final _SwitchConfig switchConfig = theme.useMaterial3 ? _SwitchConfigM3(context) : _SwitchConfigM2();
     switch (_switchType) {
       case _SwitchType.material:
-        switchConfig = theme.useMaterial3 ? _SwitchConfigM3(context) : _SwitchConfigM2();
+        break;
       case _SwitchType.adaptive:
         switch (theme.platform) {
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
           case TargetPlatform.linux:
           case TargetPlatform.windows:
-            switchConfig = theme.useMaterial3 ? _SwitchConfigM3(context) : _SwitchConfigM2();
+            break;
           case TargetPlatform.iOS:
           case TargetPlatform.macOS:
-            switchConfig = _SwitchConfigCupertino(context);
+            switchTheme = theme.adaptive(SwitchThemeData, switchTheme) as SwitchThemeData;
         }
     }
 
@@ -841,7 +841,7 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
     }
 
     final ThemeData theme = Theme.of(context);
-    final SwitchThemeData switchTheme = SwitchTheme.of(context);
+    SwitchThemeData switchTheme = SwitchTheme.of(context);
     final Color cupertinoPrimaryColor = theme.cupertinoOverrideTheme?.primaryColor ?? theme.colorScheme.primary;
 
     _SwitchConfig switchConfig;
@@ -863,6 +863,7 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
           case TargetPlatform.iOS:
           case TargetPlatform.macOS:
             isCupertino = true;
+            switchTheme = theme.adaptive(SwitchThemeData, switchTheme) as SwitchThemeData;
             applyCupertinoTheme = widget.applyCupertinoTheme
               ?? theme.cupertinoOverrideTheme?.applyThemeToAll
               ?? false;
