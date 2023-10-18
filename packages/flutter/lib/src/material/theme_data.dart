@@ -74,7 +74,7 @@ export 'package:flutter/services.dart' show Brightness;
 // late BuildContext context;
 
 ///
-typedef AdaptiveThemeCallback<Object> = Object Function(ThemeData theme, Type t, Object defaultValue);
+typedef AdaptiveThemeCallback<Object> = Object Function(Type t, Object defaultValue);
 
 /// An interface that defines custom additions to a [ThemeData] object.
 ///
@@ -634,7 +634,7 @@ class ThemeData with Diagnosticable {
       timePickerTheme: timePickerTheme,
       toggleButtonsTheme: toggleButtonsTheme,
       tooltipTheme: tooltipTheme,
-      adaptiveThemeCallback: adaptiveThemeCallback,
+      adaptiveThemeCallback: adaptiveThemeCallback ?? _defaultAdaptiveThemeCallback,
       // DEPRECATED (newest deprecations at the bottom)
       toggleableActiveColor: toggleableActiveColor,
       selectedRowColor: selectedRowColor,
@@ -745,7 +745,7 @@ class ThemeData with Diagnosticable {
     required this.timePickerTheme,
     required this.toggleButtonsTheme,
     required this.tooltipTheme,
-    this.adaptiveThemeCallback,
+    required this.adaptiveThemeCallback,
     // DEPRECATED (newest deprecations at the bottom)
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
@@ -873,15 +873,10 @@ class ThemeData with Diagnosticable {
   factory ThemeData.fallback({bool? useMaterial3}) => ThemeData.light(useMaterial3: useMaterial3);
 
   ///
-  Object adaptive(Type t, Object defaultValue) {
-    if (adaptiveThemeCallback != null) {
-      return adaptiveThemeCallback!(this, t, defaultValue);
-    }
-    return _defaultAdaptiveThemeCallback(this, t, defaultValue);
-  }
+  Object adaptive(Type t, Object defaultValue) => adaptiveThemeCallback(t, defaultValue);
 
   ///
-  Object _defaultAdaptiveThemeCallback(ThemeData theme, Type t, Object defaultValue) {
+  static Object _defaultAdaptiveThemeCallback(Type t, Object defaultValue) {
     switch (t) {
       case const (SwitchThemeData):
         return const SwitchThemeData();
@@ -1459,7 +1454,7 @@ class ThemeData with Diagnosticable {
   final TooltipThemeData tooltipTheme;
 
   ///
-  final AdaptiveThemeCallback<Object>? adaptiveThemeCallback;
+  final AdaptiveThemeCallback<Object> adaptiveThemeCallback;
 
   // DEPRECATED (newest deprecations at the bottom)
 
