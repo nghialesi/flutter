@@ -560,7 +560,9 @@ class Switch extends StatelessWidget {
             break;
           case TargetPlatform.iOS:
           case TargetPlatform.macOS:
-            switchTheme = theme.adaptive(SwitchThemeData, switchTheme) as SwitchThemeData;
+            switchTheme = theme.copyWith(
+              adaptations: <Adaptation<SwitchThemeData>>[ const _SwitchThemeAdaptation() ]
+            ).adaptive(switchTheme);
         }
     }
 
@@ -864,7 +866,9 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
           case TargetPlatform.iOS:
           case TargetPlatform.macOS:
             isCupertino = true;
-            switchTheme = theme.adaptive(SwitchThemeData, switchTheme) as SwitchThemeData;
+            switchTheme = theme.copyWith(
+              adaptations: <Adaptation<SwitchThemeData>>[ const _SwitchThemeAdaptation() ]
+            ).adaptive(switchTheme);
             applyCupertinoTheme = widget.applyCupertinoTheme
               ?? theme.cupertinoOverrideTheme?.applyThemeToAll
               ?? false;
@@ -2227,4 +2231,11 @@ class _SwitchConfigCupertino with _SwitchConfig {
   // Hand coded default based on the animation specs.
   @override
   double? get thumbOffset => null;
+}
+
+class _SwitchThemeAdaptation extends Adaptation<SwitchThemeData> {
+  const _SwitchThemeAdaptation();
+
+  @override
+  SwitchThemeData adapt(ThemeData theme, SwitchThemeData defaultValue) => const SwitchThemeData();
 }
