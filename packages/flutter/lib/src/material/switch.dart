@@ -901,16 +901,9 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
       ?? (applyCupertinoTheme ? cupertinoPrimaryColor : switchTheme.trackColor?.resolve(activeStates))
       ?? _widgetThumbColor.resolve(activeStates)?.withAlpha(0x80)
       ?? defaults.trackColor!.resolve(activeStates)!;
-    final Color effectiveActiveTrackOutlineColor = widget.trackOutlineColor?.resolve(activeStates)
+    final Color? effectiveActiveTrackOutlineColor = widget.trackOutlineColor?.resolve(activeStates)
       ?? switchTheme.trackOutlineColor?.resolve(activeStates)
-      ?? (applyCupertinoTheme
-        ? HSLColor
-          .fromColor(cupertinoPrimaryColor.withOpacity(0.80))
-          .withLightness(0.69).withSaturation(0.835)
-          .toColor()
-        : null)
-      ?? defaults.trackOutlineColor!.resolve(activeStates)
-      ?? Colors.transparent;
+      ?? defaults.trackOutlineColor!.resolve(activeStates);
     final double? effectiveActiveTrackOutlineWidth = widget.trackOutlineWidth?.resolve(activeStates)
       ?? switchTheme.trackOutlineWidth?.resolve(activeStates)
       ?? defaults.trackOutlineWidth?.resolve(activeStates);
@@ -920,13 +913,6 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
       ?? switchTheme.trackColor?.resolve(inactiveStates)
       ?? defaults.trackColor!.resolve(inactiveStates)!;
     final Color? effectiveInactiveTrackOutlineColor = widget.trackOutlineColor?.resolve(inactiveStates)
-      ?? (applyCupertinoTheme
-        ? HSLColor
-          .fromColor(cupertinoPrimaryColor.withOpacity(0.80))
-          .withLightness(0.69).withSaturation(0.835)
-          .toColor()
-        : null
-      )
       ?? switchTheme.trackOutlineColor?.resolve(inactiveStates)
       ?? defaults.trackOutlineColor?.resolve(inactiveStates);
     final double? effectiveInactiveTrackOutlineWidth = widget.trackOutlineWidth?.resolve(inactiveStates)
@@ -945,6 +931,12 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
     final Color effectiveFocusOverlayColor = widget.overlayColor?.resolve(focusedStates)
       ?? widget.focusColor
       ?? switchTheme.overlayColor?.resolve(focusedStates)
+      ?? (applyCupertinoTheme
+        ? HSLColor
+          .fromColor(cupertinoPrimaryColor.withOpacity(0.80))
+          .withLightness(0.69).withSaturation(0.835)
+          .toColor()
+        : null)
       ?? defaults.overlayColor!.resolve(focusedStates)!;
 
     final Set<MaterialState> hoveredStates = states..add(MaterialState.hovered);
@@ -976,7 +968,7 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
     final MaterialStateProperty<MouseCursor> effectiveMouseCursor = MaterialStateProperty.resolveWith<MouseCursor>((Set<MaterialState> states) {
       return MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
         ?? switchTheme.mouseCursor?.resolve(states)
-        ?? MaterialStateProperty.resolveAs<MouseCursor>(MaterialStateMouseCursor.clickable, states);
+        ?? defaults.mouseCursor!.resolve(states)!;
     });
 
     final double effectiveActiveThumbRadius = effectiveActiveIcon == null ? switchConfig.activeThumbRadius : switchConfig.thumbRadiusWithIcon;
@@ -1389,15 +1381,8 @@ class _SwitchPainter extends ToggleablePainter {
     return ShapeDecoration(
       color: color,
       image: image == null ? null : DecorationImage(image: image, onError: errorListener),
-      shape: StadiumBorder(
-        side: isCupertino
-          ? const BorderSide(
-            width: 0.5,
-            color: Color(0x0A000000),
-            strokeAlign: 0.5
-          ) : BorderSide.none,
-      ),
-      shadows: thumbShadow,
+      shape: const StadiumBorder(),
+      shadows: isCupertino ? null : thumbShadow,
     );
   }
 
@@ -1525,7 +1510,7 @@ class _SwitchPainter extends ToggleablePainter {
 
     final double colorValue = CurvedAnimation(parent: positionController, curve: Curves.easeOut, reverseCurve: Curves.easeIn).value;
     final Color trackColor = Color.lerp(inactiveTrackColor, activeTrackColor, colorValue)!;
-    final Color? trackOutlineColor = inactiveTrackOutlineColor == null ? null
+    final Color? trackOutlineColor = inactiveTrackOutlineColor == null || activeTrackOutlineColor == null ? null
         : Color.lerp(inactiveTrackOutlineColor, activeTrackOutlineColor, colorValue);
     final double? trackOutlineWidth = lerpDouble(inactiveTrackOutlineWidth, activeTrackOutlineWidth, colorValue);
     Color lerpedThumbColor;
@@ -1608,35 +1593,36 @@ class _SwitchPainter extends ToggleablePainter {
 
     canvas.drawRRect(trackRRect, paint);
 
+    // paint track outline
     if (trackOutlineColor != null) {
-      RRect? outlineTrackRRect;
-      if (isCupertino) {
-        if (isFocused) {
-          outlineTrackRRect = trackRRect.inflate(1.5);
-        }
-      } else {
-        // paint track outline
-        final Rect outlineTrackRect = Rect.fromLTWH(
-          trackPaintOffset.dx + 1,
-          trackPaintOffset.dy + 1,
-          trackWidth - 2,
-          trackHeight - 2,
-        );
-        outlineTrackRRect = RRect.fromRectAndRadius(
-          outlineTrackRect,
-          Radius.circular(trackRadius),
-        );
-      }
+      final Rect outlineTrackRect = Rect.fromLTWH(
+        trackPaintOffset.dx + 1,
+        trackPaintOffset.dy + 1,
+        trackWidth - 2,
+        trackHeight - 2,
+      );
+      final RRect outlineTrackRRect = RRect.fromRectAndRadius(
+        outlineTrackRect,
+        Radius.circular(trackRadius),
+      );
+
       final Paint outlinePaint = Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = trackOutlineWidth ?? 2.0
         ..color = trackOutlineColor;
 
-      if (outlineTrackRRect != null) {
-        canvas.drawRRect(outlineTrackRRect, outlinePaint);
-      }
+      canvas.drawRRect(outlineTrackRRect, outlinePaint);
     }
+
     if (isCupertino) {
+      if (isFocused) {
+        final RRect focusedOutline = trackRRect.inflate(1.75);
+        final Paint focusedPaint = Paint()
+          ..style = PaintingStyle.stroke
+          ..color = focusColor
+          ..strokeWidth = _kCupertinoFocusTrackOutline;
+        canvas.drawRRect(focusedOutline, focusedPaint);
+      }
       canvas.clipRRect(trackRRect);
     }
   }
@@ -1662,6 +1648,10 @@ class _SwitchPainter extends ToggleablePainter {
         _cachedThumbPainter = _createDefaultThumbDecoration(thumbColor, thumbImage, thumbErrorListener).createBoxPainter(_handleDecorationChanged);
       }
       final BoxPainter thumbPainter = _cachedThumbPainter!;
+
+      if (isCupertino) {
+        _paintCupertinoThumbShadowAndBorder(canvas, thumbPaintOffset, thumbSize);
+      }
 
       thumbPainter.paint(
         canvas,
@@ -1709,6 +1699,26 @@ class _SwitchPainter extends ToggleablePainter {
     } finally {
       _isPainting = false;
     }
+  }
+
+  void _paintCupertinoThumbShadowAndBorder(Canvas canvas, Offset thumbPaintOffset, Size thumbSize,) {
+    final RRect thumbBounds = RRect.fromLTRBR(
+      thumbPaintOffset.dx,
+      thumbPaintOffset.dy,
+      thumbPaintOffset.dx + thumbSize.width,
+      thumbPaintOffset.dy + thumbSize.height,
+      Radius.circular(thumbSize.height / 2.0),
+    );
+    if (thumbShadow != null) {
+      for (final BoxShadow shadow in thumbShadow!) {
+        canvas.drawRRect(thumbBounds.shift(shadow.offset), shadow.toPaint());
+      }
+    }
+
+    canvas.drawRRect(
+      thumbBounds.inflate(0.5),
+      Paint()..color = const Color(0x0A000000),
+    );
   }
 
   @override
@@ -1980,6 +1990,10 @@ class _SwitchDefaultsM3 extends SwitchThemeData {
   }
 
   @override
+  MaterialStateProperty<MouseCursor> get mouseCursor =>
+    MaterialStateProperty.resolveWith((Set<MaterialState> states) => MaterialStateMouseCursor.clickable.resolve(states));
+
+  @override
   MaterialStatePropertyAll<double> get trackOutlineWidth => const MaterialStatePropertyAll<double>(2.0);
 
   @override
@@ -2084,12 +2098,9 @@ class _SwitchDefaultsCupertino extends SwitchThemeData {
   MaterialStateProperty<MouseCursor?> get mouseCursor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
-        return MouseCursor.defer;
+        return SystemMouseCursors.basic;
       }
-      if (kIsWeb) {
-        return SystemMouseCursors.click;
-      }
-      return MouseCursor.defer;
+      return kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic;
     });
   }
 
@@ -2107,7 +2118,10 @@ class _SwitchDefaultsCupertino extends SwitchThemeData {
   }
 
   @override
-  MaterialStateProperty<Color?> get trackOutlineColor {
+  MaterialStateProperty<Color?> get trackOutlineColor => const MaterialStatePropertyAll<Color>(Colors.transparent);
+
+  @override
+  MaterialStateProperty<Color?> get overlayColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.focused)) {
         return HSLColor
@@ -2116,19 +2130,6 @@ class _SwitchDefaultsCupertino extends SwitchThemeData {
           .toColor();
       }
       return Colors.transparent;
-    });
-  }
-
-  @override
-  MaterialStateProperty<Color?> get overlayColor => const MaterialStatePropertyAll<Color>(Colors.transparent);
-
-  @override
-  MaterialStateProperty<double?> get trackOutlineWidth {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.focused)) {
-        return _kCupertinoFocusTrackOutline;
-      }
-      return 0.0;
     });
   }
 
@@ -2205,11 +2206,11 @@ class _SwitchConfigCupertino with _SwitchConfig {
     BoxShadow(
       color: Color(0x26000000),
       offset: Offset(0, 3),
-      blurRadius: 5.0,
+      blurRadius: 8.0,
     ),
     BoxShadow(
-      color: Color(0x29000000),
-      offset: Offset(0, 1),
+      color: Color(0x0F000000),
+      offset: Offset(0, 3),
       blurRadius: 1.0,
     ),
   ];
