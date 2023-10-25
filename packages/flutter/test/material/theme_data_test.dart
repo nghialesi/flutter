@@ -724,6 +724,7 @@ void main() {
       // alphabetical by symbol name.
 
       // GENERAL CONFIGURATION
+      adaptationMap: const <Type, Adaptation<Object>>{},
       applyElevationOverlayColor: false,
       cupertinoOverrideTheme: null,
       extensions: const <Object, ThemeExtension<dynamic>>{},
@@ -836,6 +837,9 @@ void main() {
       // alphabetical by symbol name.
 
       // GENERAL CONFIGURATION
+      adaptationMap: const <Type, Adaptation<Object>>{
+        SwitchThemeData: SwitchThemeAdaptation(),
+      },
       applyElevationOverlayColor: true,
       cupertinoOverrideTheme: ThemeData.light().cupertinoOverrideTheme,
       extensions: const <Object, ThemeExtension<dynamic>>{
@@ -941,6 +945,7 @@ void main() {
       // alphabetical by symbol name.
 
       // GENERAL CONFIGURATION
+      adaptations: otherTheme.adaptationMap.values,
       applyElevationOverlayColor: otherTheme.applyElevationOverlayColor,
       cupertinoOverrideTheme: otherTheme.cupertinoOverrideTheme,
       extensions: otherTheme.extensions.values,
@@ -1041,6 +1046,7 @@ void main() {
     // alphabetical by symbol name.
 
     // GENERAL CONFIGURATION
+    expect(themeDataCopy.adaptationMap, equals(otherTheme.adaptationMap));
     expect(themeDataCopy.applyElevationOverlayColor, equals(otherTheme.applyElevationOverlayColor));
     expect(themeDataCopy.cupertinoOverrideTheme, equals(otherTheme.cupertinoOverrideTheme));
     expect(themeDataCopy.extensions, equals(otherTheme.extensions));
@@ -1178,6 +1184,7 @@ void main() {
     // List of properties must match the properties in ThemeData.hashCode()
     final Set<String> expectedPropertyNames = <String>{
       // GENERAL CONFIGURATION
+      'adaptations',
       'applyElevationOverlayColor',
       'cupertinoOverrideTheme',
       'extensions',
@@ -1341,3 +1348,11 @@ class MyThemeExtensionB extends ThemeExtension<MyThemeExtensionB> {
     );
   }
 }
+
+class SwitchThemeAdaptation extends Adaptation<SwitchThemeData> {
+  const SwitchThemeAdaptation();
+
+  @override
+  SwitchThemeData adapt(ThemeData theme, SwitchThemeData defaultValue) => const SwitchThemeData();
+}
+

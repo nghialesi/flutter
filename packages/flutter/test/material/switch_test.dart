@@ -1647,6 +1647,7 @@ void main() {
   testWidgetsWithLeakTracking('Switch.adaptive default focus color(Cupertino)', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     final FocusNode node = FocusNode();
+    addTearDown(node.dispose);
     await tester.pumpWidget(
       buildAdaptiveSwitch(
         platform: TargetPlatform.macOS,

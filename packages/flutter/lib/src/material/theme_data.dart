@@ -253,6 +253,7 @@ class ThemeData with Diagnosticable {
     // alphabetical by symbol name.
 
     // GENERAL CONFIGURATION
+    Iterable<Adaptation<Object>>? adaptations,
     bool? applyElevationOverlayColor,
     NoDefaultCupertinoThemeData? cupertinoOverrideTheme,
     Iterable<ThemeExtension<dynamic>>? extensions,
@@ -346,7 +347,6 @@ class ThemeData with Diagnosticable {
     TimePickerThemeData? timePickerTheme,
     ToggleButtonsThemeData? toggleButtonsTheme,
     TooltipThemeData? tooltipTheme,
-    Iterable<Adaptation<Object>>? adaptations,
     // DEPRECATED (newest deprecations at the bottom)
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
@@ -560,6 +560,7 @@ class ThemeData with Diagnosticable {
       // alphabetical by symbol name.
 
       // GENERAL CONFIGURATION
+      adaptationMap: _updateAdaptationMap(adaptations),
       applyElevationOverlayColor: applyElevationOverlayColor,
       cupertinoOverrideTheme: cupertinoOverrideTheme,
       extensions: _themeExtensionIterableToMap(extensions),
@@ -644,7 +645,6 @@ class ThemeData with Diagnosticable {
       timePickerTheme: timePickerTheme,
       toggleButtonsTheme: toggleButtonsTheme,
       tooltipTheme: tooltipTheme,
-      adaptationMap: _updateAdaptationMap(adaptations),
       // DEPRECATED (newest deprecations at the bottom)
       toggleableActiveColor: toggleableActiveColor,
       selectedRowColor: selectedRowColor,
@@ -668,6 +668,7 @@ class ThemeData with Diagnosticable {
     // alphabetical by symbol name.
 
     // GENERAL CONFIGURATION
+    required this.adaptationMap,
     required this.applyElevationOverlayColor,
     required this.cupertinoOverrideTheme,
     required this.extensions,
@@ -755,7 +756,6 @@ class ThemeData with Diagnosticable {
     required this.timePickerTheme,
     required this.toggleButtonsTheme,
     required this.tooltipTheme,
-    required this.adaptationMap,
     // DEPRECATED (newest deprecations at the bottom)
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
@@ -1511,10 +1511,10 @@ class ThemeData with Diagnosticable {
     // alphabetical by symbol name.
 
     // GENERAL CONFIGURATION
+    Iterable<Adaptation<Object>>? adaptations,
     bool? applyElevationOverlayColor,
     NoDefaultCupertinoThemeData? cupertinoOverrideTheme,
     Iterable<ThemeExtension<dynamic>>? extensions,
-    Iterable<Adaptation<Object>>? adaptations,
     InputDecorationTheme? inputDecorationTheme,
     MaterialTapTargetSize? materialTapTargetSize,
     PageTransitionsTheme? pageTransitionsTheme,
@@ -1644,6 +1644,7 @@ class ThemeData with Diagnosticable {
       // alphabetical by symbol name.
 
       // GENERAL CONFIGURATION
+      adaptationMap: adaptations != null ? _updateAdaptationMap(adaptations) : adaptationMap,
       applyElevationOverlayColor: applyElevationOverlayColor ?? this.applyElevationOverlayColor,
       cupertinoOverrideTheme: cupertinoOverrideTheme ?? this.cupertinoOverrideTheme,
       extensions: (extensions != null) ? _themeExtensionIterableToMap(extensions) : this.extensions,
@@ -1730,7 +1731,6 @@ class ThemeData with Diagnosticable {
       timePickerTheme: timePickerTheme ?? this.timePickerTheme,
       toggleButtonsTheme: toggleButtonsTheme ?? this.toggleButtonsTheme,
       tooltipTheme: tooltipTheme ?? this.tooltipTheme,
-      adaptationMap: adaptations != null ? _updateAdaptationMap(adaptations) : adaptationMap,
       // DEPRECATED (newest deprecations at the bottom)
       toggleableActiveColor: toggleableActiveColor ?? _toggleableActiveColor,
       selectedRowColor: selectedRowColor ?? _selectedRowColor,
@@ -1845,6 +1845,7 @@ class ThemeData with Diagnosticable {
       // alphabetical by symbol name.
 
       // GENERAL CONFIGURATION
+      adaptationMap: t < 0.5 ? a.adaptationMap : b.adaptationMap,
       applyElevationOverlayColor:t < 0.5 ? a.applyElevationOverlayColor : b.applyElevationOverlayColor,
       cupertinoOverrideTheme:t < 0.5 ? a.cupertinoOverrideTheme : b.cupertinoOverrideTheme,
       extensions: _lerpThemeExtensions(a, b, t),
@@ -1929,7 +1930,6 @@ class ThemeData with Diagnosticable {
       timePickerTheme: TimePickerThemeData.lerp(a.timePickerTheme, b.timePickerTheme, t),
       toggleButtonsTheme: ToggleButtonsThemeData.lerp(a.toggleButtonsTheme, b.toggleButtonsTheme, t)!,
       tooltipTheme: TooltipThemeData.lerp(a.tooltipTheme, b.tooltipTheme, t)!,
-      adaptationMap: t < 0.5 ? a.adaptationMap : b.adaptationMap,
       // DEPRECATED (newest deprecations at the bottom)
       toggleableActiveColor: Color.lerp(a.toggleableActiveColor, b.toggleableActiveColor, t),
       selectedRowColor: Color.lerp(a.selectedRowColor, b.selectedRowColor, t),
@@ -1951,6 +1951,7 @@ class ThemeData with Diagnosticable {
         // alphabetical by symbol name.
 
         // GENERAL CONFIGURATION
+        mapEquals(other.adaptationMap, adaptationMap) &&
         other.applyElevationOverlayColor == applyElevationOverlayColor &&
         other.cupertinoOverrideTheme == cupertinoOverrideTheme &&
         mapEquals(other.extensions, extensions) &&
@@ -1962,7 +1963,6 @@ class ThemeData with Diagnosticable {
         other.splashFactory == splashFactory &&
         other.useMaterial3 == useMaterial3 &&
         other.visualDensity == visualDensity &&
-        mapEquals(other.adaptationMap, adaptationMap) &&
         // COLOR
         other.canvasColor == canvasColor &&
         other.cardColor == cardColor &&
@@ -2053,6 +2053,8 @@ class ThemeData with Diagnosticable {
       // alphabetical by symbol name.
 
       // GENERAL CONFIGURATION
+      ...adaptationMap.keys,
+      ...adaptationMap.values,
       applyElevationOverlayColor,
       cupertinoOverrideTheme,
       ...extensions.keys,
@@ -2138,7 +2140,6 @@ class ThemeData with Diagnosticable {
       timePickerTheme,
       toggleButtonsTheme,
       tooltipTheme,
-      adaptationMap,
       // DEPRECATED (newest deprecations at the bottom)
       toggleableActiveColor,
       selectedRowColor,
@@ -2159,6 +2160,7 @@ class ThemeData with Diagnosticable {
     // alphabetical by symbol name.
 
     // GENERAL CONFIGURATION
+    properties.add(IterableProperty<Adaptation<dynamic>>('adaptations', adaptationMap.values, defaultValue: defaultData.adaptationMap.values, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<bool>('applyElevationOverlayColor', applyElevationOverlayColor, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<NoDefaultCupertinoThemeData>('cupertinoOverrideTheme', cupertinoOverrideTheme, defaultValue: defaultData.cupertinoOverrideTheme, level: DiagnosticLevel.debug));
     properties.add(IterableProperty<ThemeExtension<dynamic>>('extensions', extensions.values, defaultValue: defaultData.extensions.values, level: DiagnosticLevel.debug));
@@ -2170,7 +2172,6 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<InteractiveInkFeatureFactory>('splashFactory', splashFactory, defaultValue: defaultData.splashFactory, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<bool>('useMaterial3', useMaterial3, defaultValue: defaultData.useMaterial3, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: defaultData.visualDensity, level: DiagnosticLevel.debug));
-    properties.add(IterableProperty<Adaptation<dynamic>>('adaptations', adaptationMap.values, defaultValue: defaultData.adaptationMap.values, level: DiagnosticLevel.debug));
     // COLORS
     properties.add(ColorProperty('canvasColor', canvasColor, defaultValue: defaultData.canvasColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('cardColor', cardColor, defaultValue: defaultData.cardColor, level: DiagnosticLevel.debug));
