@@ -379,6 +379,7 @@ class ThemeData with Diagnosticable {
     // GENERAL CONFIGURATION
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     extensions ??= <ThemeExtension<dynamic>>[];
+    adaptations ??= <Adaptation<Object>>[];
     inputDecorationTheme ??= const InputDecorationTheme();
     platform ??= defaultTargetPlatform;
     switch (platform) {
@@ -887,8 +888,7 @@ class ThemeData with Diagnosticable {
     return adaptation == null ? defaultValue : adaptation.adapt(this, defaultValue);
   }
 
-  static Map<Type, Adaptation<Object>> _updateAdaptationMap(Iterable<Adaptation<Object>>? adaptations) {
-    adaptations ??= const <Adaptation<Object>>[];
+  static Map<Type, Adaptation<Object>> _updateAdaptationMap(Iterable<Adaptation<Object>> adaptations) {
     final Map<Type, Adaptation<Object>> adaptationMap = <Type, Adaptation<Object>>{
       for (final Adaptation<Object> adaptation in adaptations)
         adaptation.type: adaptation
@@ -984,6 +984,12 @@ class ThemeData with Diagnosticable {
   ///
   /// See [extensions] for an interactive example.
   T? extension<T>() => extensions[T] as T?;
+
+  ///
+  final Map<Type, Adaptation<Object>> adaptationMap;
+
+  ///
+  Adaptation<T>? adaptation<T>() => adaptationMap[T] as Adaptation<T>?;
 
   /// The default [InputDecoration] values for [InputDecorator], [TextField],
   /// and [TextFormField] are based on this theme.
@@ -1464,9 +1470,6 @@ class ThemeData with Diagnosticable {
   /// This is the value returned from [TooltipTheme.of].
   final TooltipThemeData tooltipTheme;
 
-  ///
-  final Map<Type, Adaptation<Object>> adaptationMap;
-
   // DEPRECATED (newest deprecations at the bottom)
 
   /// Obsolete property that was used for input validation errors, e.g. in
@@ -1511,6 +1514,7 @@ class ThemeData with Diagnosticable {
     bool? applyElevationOverlayColor,
     NoDefaultCupertinoThemeData? cupertinoOverrideTheme,
     Iterable<ThemeExtension<dynamic>>? extensions,
+    Iterable<Adaptation<Object>>? adaptations,
     InputDecorationTheme? inputDecorationTheme,
     MaterialTapTargetSize? materialTapTargetSize,
     PageTransitionsTheme? pageTransitionsTheme,
@@ -1595,7 +1599,6 @@ class ThemeData with Diagnosticable {
     TimePickerThemeData? timePickerTheme,
     ToggleButtonsThemeData? toggleButtonsTheme,
     TooltipThemeData? tooltipTheme,
-    Iterable<Adaptation<Object>>? adaptations,
     // DEPRECATED (newest deprecations at the bottom)
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
@@ -1727,7 +1730,7 @@ class ThemeData with Diagnosticable {
       timePickerTheme: timePickerTheme ?? this.timePickerTheme,
       toggleButtonsTheme: toggleButtonsTheme ?? this.toggleButtonsTheme,
       tooltipTheme: tooltipTheme ?? this.tooltipTheme,
-      adaptationMap: _updateAdaptationMap(adaptations),
+      adaptationMap: adaptations != null ? _updateAdaptationMap(adaptations) : adaptationMap,
       // DEPRECATED (newest deprecations at the bottom)
       toggleableActiveColor: toggleableActiveColor ?? _toggleableActiveColor,
       selectedRowColor: selectedRowColor ?? _selectedRowColor,
@@ -1959,6 +1962,7 @@ class ThemeData with Diagnosticable {
         other.splashFactory == splashFactory &&
         other.useMaterial3 == useMaterial3 &&
         other.visualDensity == visualDensity &&
+        mapEquals(other.adaptationMap, adaptationMap) &&
         // COLOR
         other.canvasColor == canvasColor &&
         other.cardColor == cardColor &&
@@ -2134,6 +2138,7 @@ class ThemeData with Diagnosticable {
       timePickerTheme,
       toggleButtonsTheme,
       tooltipTheme,
+      adaptationMap,
       // DEPRECATED (newest deprecations at the bottom)
       toggleableActiveColor,
       selectedRowColor,
@@ -2165,6 +2170,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<InteractiveInkFeatureFactory>('splashFactory', splashFactory, defaultValue: defaultData.splashFactory, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<bool>('useMaterial3', useMaterial3, defaultValue: defaultData.useMaterial3, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: defaultData.visualDensity, level: DiagnosticLevel.debug));
+    properties.add(IterableProperty<Adaptation<dynamic>>('adaptations', adaptationMap.values, defaultValue: defaultData.adaptationMap.values, level: DiagnosticLevel.debug));
     // COLORS
     properties.add(ColorProperty('canvasColor', canvasColor, defaultValue: defaultData.canvasColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('cardColor', cardColor, defaultValue: defaultData.cardColor, level: DiagnosticLevel.debug));

@@ -98,7 +98,7 @@ class Switch extends StatelessWidget {
   ///
   /// * [value] determines whether this switch is on or off.
   /// * [onChanged] is called when the user toggles the switch on or off.
-  Switch({
+  const Switch({
     super.key,
     required this.value,
     required this.onChanged,
@@ -545,7 +545,7 @@ class Switch extends StatelessWidget {
   final bool autofocus;
 
   Size _getSwitchSize(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+    ThemeData theme = Theme.of(context);
     SwitchThemeData switchTheme = SwitchTheme.of(context);
     final _SwitchConfig switchConfig = theme.useMaterial3 ? _SwitchConfigM3(context) : _SwitchConfigM2();
     switch (_switchType) {
@@ -560,9 +560,16 @@ class Switch extends StatelessWidget {
             break;
           case TargetPlatform.iOS:
           case TargetPlatform.macOS:
-            switchTheme = theme.copyWith(
-              adaptations: <Adaptation<SwitchThemeData>>[ const _SwitchThemeAdaptation() ]
-            ).adaptive(switchTheme);
+            final Adaptation<SwitchThemeData> adaptation = theme.adaptation()
+              ?? const _SwitchThemeAdaptation();
+
+            theme = theme.copyWith(
+              adaptations: <Adaptation<Object>>[
+                ...theme.adaptationMap.values,
+                adaptation,
+              ]
+            );
+            switchTheme = theme.adaptive(switchTheme);
         }
     }
 
@@ -850,6 +857,21 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
     widget.onChanged?.call(value!);
   }
 
+  SwitchThemeData adaptiveSwitchTheme(SwitchThemeData switchTheme, ThemeData theme) {
+    final Iterable<Adaptation<Object>> adaptations = theme.adaptationMap.values;
+    final Adaptation<SwitchThemeData> adaptation = theme.adaptation()
+        ?? const _SwitchThemeAdaptation();
+
+    theme = theme.copyWith(
+        adaptations: <Adaptation<Object>>[
+          ...adaptations,
+          adaptation,
+        ]
+    );
+
+    return theme.adaptive(switchTheme);
+  }
+
   bool isCupertino = false;
 
   @override
@@ -884,9 +906,7 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
           case TargetPlatform.iOS:
           case TargetPlatform.macOS:
             isCupertino = true;
-            switchTheme = theme.copyWith(
-              adaptations: <Adaptation<SwitchThemeData>>[ const _SwitchThemeAdaptation() ]
-            ).adaptive(switchTheme);
+            switchTheme = adaptiveSwitchTheme(switchTheme, theme);
             applyCupertinoTheme = widget.applyCupertinoTheme
               ?? theme.cupertinoOverrideTheme?.applyThemeToAll
               ?? false;
@@ -2168,33 +2188,9 @@ class _SwitchConfigCupertino with _SwitchConfig {
   MaterialStateProperty<Color> get iconColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
-        if (states.contains(MaterialState.selected)) {
-          return _colors.onSurface.withOpacity(0.38);
-        }
-        return _colors.surfaceVariant.withOpacity(0.38);
+        return _colors.onSurface.withOpacity(0.38);
       }
-      if (states.contains(MaterialState.selected)) {
-        if (states.contains(MaterialState.pressed)) {
-          return _colors.onPrimaryContainer;
-        }
-        if (states.contains(MaterialState.hovered)) {
-          return _colors.onPrimaryContainer;
-        }
-        if (states.contains(MaterialState.focused)) {
-          return _colors.onPrimaryContainer;
-        }
-        return _colors.onPrimaryContainer;
-      }
-      if (states.contains(MaterialState.pressed)) {
-        return _colors.surfaceVariant;
-      }
-      if (states.contains(MaterialState.hovered)) {
-        return _colors.surfaceVariant;
-      }
-      if (states.contains(MaterialState.focused)) {
-        return _colors.surfaceVariant;
-      }
-      return _colors.surfaceVariant;
+      return _colors.onPrimaryContainer;
     });
   }
 
@@ -2208,13 +2204,13 @@ class _SwitchConfigCupertino with _SwitchConfig {
   double get pressedThumbRadius => 14.0;
 
   @override
-  double get switchHeight => 39.0;
+  double get switchHeight => _kSwitchMinSize + 8.0;
 
   @override
-  double get switchHeightCollapsed => 39.0;
+  double get switchHeightCollapsed => _kSwitchMinSize;
 
   @override
-  double get switchWidth => 59.0;
+  double get switchWidth => 60.0;
 
   @override
   double get thumbRadiusWithIcon => 14.0;
