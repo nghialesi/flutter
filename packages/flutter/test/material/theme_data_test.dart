@@ -1291,6 +1291,45 @@ void main() {
     // Ensure they are all there.
     expect(propertyNames, expectedPropertyNames);
   });
+
+  group('Theme adaptationMap', () {
+    const Key containerKey = Key('container');
+
+    testWidgetsWithLeakTracking('can be obtained', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            adaptations: const <Adaptation<Object>>[
+              StringAdaptation(),
+              SwitchThemeAdaptation()
+            ],
+          ),
+          home: Container(key: containerKey),
+        ),
+      );
+
+      final ThemeData theme = Theme.of(
+        tester.element(find.byKey(containerKey)),
+      );
+      final String adaptiveString = theme.adaptation<String>()!.adapt(theme, 'Default theme');
+      final SwitchThemeData adaptiveSwitchTheme = theme.adaptation<SwitchThemeData>()!
+        .adapt(theme, theme.switchTheme);
+
+      expect(adaptiveString, 'Adaptive theme.');
+      expect(adaptiveSwitchTheme.thumbColor?.resolve(<MaterialState>{}),
+        isSameColorAs(Colors.brown));
+    });
+
+    testWidgetsWithLeakTracking('should return null on extension not found', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData(
+        adaptations: const <Adaptation<Object>>[
+          StringAdaptation(),
+        ],
+      );
+
+      expect(theme.extension<SwitchThemeAdaptation>(), isNull);
+    });
+  });
 }
 
 @immutable
@@ -1353,6 +1392,15 @@ class SwitchThemeAdaptation extends Adaptation<SwitchThemeData> {
   const SwitchThemeAdaptation();
 
   @override
-  SwitchThemeData adapt(ThemeData theme, SwitchThemeData defaultValue) => const SwitchThemeData();
+  SwitchThemeData adapt(ThemeData theme, SwitchThemeData defaultValue) => const SwitchThemeData(
+    thumbColor: MaterialStatePropertyAll<Color>(Colors.brown),
+  );
+}
+
+class StringAdaptation extends Adaptation<String> {
+  const StringAdaptation();
+
+  @override
+  String adapt(ThemeData theme, String defaultValue) => 'Adaptive theme.';
 }
 
