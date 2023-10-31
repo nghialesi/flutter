@@ -579,7 +579,7 @@ class Switch extends StatelessWidget {
     Color? effectiveActiveThumbColor;
     Color? effectiveActiveTrackColor;
 
-    switch(_switchType) {
+    switch (_switchType) {
       case _SwitchType.material:
         effectiveActiveThumbColor = activeColor;
       case _SwitchType.adaptive:
@@ -712,7 +712,7 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
       if (position.value == 0.0 || position.value == 1.0) {
         switch (widget.switchType) {
           case _SwitchType.adaptive:
-            switch(Theme.of(context).platform) {
+            switch (Theme.of(context).platform) {
               case TargetPlatform.android:
               case TargetPlatform.fuchsia:
               case TargetPlatform.linux:
@@ -784,7 +784,7 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
   double get _trackInnerLength {
     switch (widget.switchType) {
       case _SwitchType.adaptive:
-        switch(Theme.of(context).platform) {
+        switch (Theme.of(context).platform) {
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
           case TargetPlatform.linux:
