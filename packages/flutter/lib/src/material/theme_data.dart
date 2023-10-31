@@ -390,7 +390,9 @@ class ThemeData with Diagnosticable {
     // GENERAL CONFIGURATION
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     extensions ??= <ThemeExtension<dynamic>>[];
-    adaptations ??= <Adaptation<Object>>[];
+    adaptations ??= <Adaptation<Object>>[
+      const _SwitchThemeAdaptation(),
+    ];
     inputDecorationTheme ??= const InputDecorationTheme();
     platform ??= defaultTargetPlatform;
     switch (platform) {
@@ -2670,6 +2672,13 @@ class VisualDensity with Diagnosticable {
   String toStringShort() {
     return '${super.toStringShort()}(h: ${debugFormatDouble(horizontal)}, v: ${debugFormatDouble(vertical)})';
   }
+}
+
+class _SwitchThemeAdaptation extends Adaptation<SwitchThemeData> {
+  const _SwitchThemeAdaptation();
+
+  @override
+  SwitchThemeData adapt(ThemeData theme, SwitchThemeData defaultValue) => const SwitchThemeData();
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - ColorScheme

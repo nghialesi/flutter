@@ -556,7 +556,7 @@ class Switch extends StatelessWidget {
   final bool autofocus;
 
   Size _getSwitchSize(BuildContext context) {
-    ThemeData theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
     SwitchThemeData switchTheme = SwitchTheme.of(context);
     final _SwitchConfig switchConfig = theme.useMaterial3 ? _SwitchConfigM3(context) : _SwitchConfigM2();
     switch (_switchType) {
@@ -571,15 +571,6 @@ class Switch extends StatelessWidget {
             break;
           case TargetPlatform.iOS:
           case TargetPlatform.macOS:
-            final Adaptation<SwitchThemeData> adaptation = theme.adaptation()
-              ?? const _SwitchThemeAdaptation();
-
-            theme = theme.copyWith(
-              adaptations: <Adaptation<Object>>[
-                ...theme.adaptationMap.values,
-                adaptation,
-              ]
-            );
             switchTheme = theme.adaptive(switchTheme);
         }
     }
@@ -868,21 +859,6 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
     widget.onChanged?.call(value!);
   }
 
-  SwitchThemeData adaptiveSwitchTheme(SwitchThemeData switchTheme, ThemeData theme) {
-    final Iterable<Adaptation<Object>> adaptations = theme.adaptationMap.values;
-    final Adaptation<SwitchThemeData> adaptation = theme.adaptation()
-        ?? const _SwitchThemeAdaptation();
-
-    theme = theme.copyWith(
-        adaptations: <Adaptation<Object>>[
-          ...adaptations,
-          adaptation,
-        ]
-    );
-
-    return theme.adaptive(switchTheme);
-  }
-
   bool isCupertino = false;
 
   @override
@@ -917,7 +893,7 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
           case TargetPlatform.iOS:
           case TargetPlatform.macOS:
             isCupertino = true;
-            switchTheme = adaptiveSwitchTheme(switchTheme, theme);
+            switchTheme = theme.adaptive(switchTheme);
             applyCupertinoTheme = widget.applyCupertinoTheme
               ?? theme.cupertinoOverrideTheme?.applyThemeToAll
               ?? false;
@@ -1919,13 +1895,6 @@ class _SwitchConfigCupertino with _SwitchConfig {
   // Hand coded default based on the animation specs.
   @override
   double? get thumbOffset => null;
-}
-
-class _SwitchThemeAdaptation extends Adaptation<SwitchThemeData> {
-  const _SwitchThemeAdaptation();
-
-  @override
-  SwitchThemeData adapt(ThemeData theme, SwitchThemeData defaultValue) => const SwitchThemeData();
 }
 
 // Hand coded defaults based on Material Design 2.
