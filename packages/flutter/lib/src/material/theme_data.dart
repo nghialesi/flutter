@@ -895,7 +895,10 @@ class ThemeData with Diagnosticable {
   /// text geometry.
   factory ThemeData.fallback({bool? useMaterial3}) => ThemeData.light(useMaterial3: useMaterial3);
 
+  /// Applies the adaptation if there is one contained in the [adaptationMap].
   ///
+  /// For example, calling `Theme.of(context).adaptive(switchThemeData)` returns
+  /// an adaptive [SwitchThemeData].
   T adaptive<T>(T defaultValue) {
     final Adaptation<T>? adaptation = adaptationMap[T] as Adaptation<T>?;
 
