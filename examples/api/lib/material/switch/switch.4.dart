@@ -14,13 +14,6 @@ class SwitchApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(
-        adaptations: const <Adaptation<Object>>[
-          // Uncomment the line below to show a customized "cupertino" switch theme
-          // data for all switches.
-          // _SwitchThemeAdaptation()
-        ],
-      ),
       home: Scaffold(
         appBar: AppBar(title: const Text('Adaptive Switches')),
         body: const Center(
@@ -135,20 +128,5 @@ class _SwitchThemeAdaptation extends Adaptation<SwitchThemeData> {
       return null;
     }),
     trackColor: const MaterialStatePropertyAll<Color>(Colors.brown),
-  );
-}
-
-class _SwitchThemeAdaptation2 extends Adaptation<SwitchThemeData> {
-  const _SwitchThemeAdaptation2();
-
-  @override
-  SwitchThemeData adapt(ThemeData theme, SwitchThemeData defaultValue) => SwitchThemeData(
-    thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
-        return const Color(0XFFD77A61);
-      }
-      return null;
-    }),
-    trackColor: const MaterialStatePropertyAll<Color>(Color(0XFF768B45)),
   );
 }
