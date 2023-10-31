@@ -1799,6 +1799,135 @@ mixin _SwitchConfig {
   int get toggleDuration;
 }
 
+// Hand coded defaults for iOS/macOS Switch
+class _SwitchDefaultsCupertino extends SwitchThemeData {
+  const _SwitchDefaultsCupertino(this.context);
+
+  final BuildContext context;
+
+  @override
+  MaterialStateProperty<MouseCursor?> get mouseCursor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return SystemMouseCursors.basic;
+      }
+      return kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic;
+    });
+  }
+
+  @override
+  MaterialStateProperty<Color> get thumbColor => const MaterialStatePropertyAll<Color>(Colors.white);
+
+  @override
+  MaterialStateProperty<Color> get trackColor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.selected)) {
+        return CupertinoDynamicColor.resolve(CupertinoColors.systemGreen, context);
+      }
+      return CupertinoDynamicColor.resolve(CupertinoColors.secondarySystemFill, context);
+    });
+  }
+
+  @override
+  MaterialStateProperty<Color?> get trackOutlineColor => const MaterialStatePropertyAll<Color>(Colors.transparent);
+
+  @override
+  MaterialStateProperty<Color?> get overlayColor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.focused)) {
+        return HSLColor
+            .fromColor(CupertinoDynamicColor.resolve(CupertinoColors.systemGreen, context).withOpacity(0.80))
+            .withLightness(0.69).withSaturation(0.835)
+            .toColor();
+      }
+      return Colors.transparent;
+    });
+  }
+
+  @override
+  double get splashRadius => 0.0;
+}
+
+const double _kCupertinoFocusTrackOutline = 3.5;
+
+class _SwitchConfigCupertino with _SwitchConfig {
+  _SwitchConfigCupertino(this.context)
+      : _colors = Theme.of(context).colorScheme;
+
+  BuildContext context;
+  final ColorScheme _colors;
+
+  @override
+  MaterialStateProperty<Color> get iconColor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return _colors.onSurface.withOpacity(0.38);
+      }
+      return _colors.onPrimaryContainer;
+    });
+  }
+
+  @override
+  double get activeThumbRadius => 14.0;
+
+  @override
+  double get inactiveThumbRadius => 14.0;
+
+  @override
+  double get pressedThumbRadius => 14.0;
+
+  @override
+  double get switchHeight => _kSwitchMinSize + 8.0;
+
+  @override
+  double get switchHeightCollapsed => _kSwitchMinSize;
+
+  @override
+  double get switchWidth => 60.0;
+
+  @override
+  double get thumbRadiusWithIcon => 14.0;
+
+  @override
+  List<BoxShadow>? get thumbShadow => const <BoxShadow> [
+    BoxShadow(
+      color: Color(0x26000000),
+      offset: Offset(0, 3),
+      blurRadius: 8.0,
+    ),
+    BoxShadow(
+      color: Color(0x0F000000),
+      offset: Offset(0, 3),
+      blurRadius: 1.0,
+    ),
+  ];
+
+  @override
+  double get trackHeight => 31.0;
+
+  @override
+  double get trackWidth => 51.0;
+
+  // The thumb size at the middle of the track. Hand coded default based on the animation specs.
+  @override
+  Size get transitionalThumbSize => const Size(28.0, 28.0);
+
+  // Hand coded default by comparing with [CupertinoSwitch].
+  @override
+  int get toggleDuration => 140;
+
+  // Hand coded default based on the animation specs.
+  @override
+  double? get thumbOffset => null;
+}
+
+class _SwitchThemeAdaptation extends Adaptation<SwitchThemeData> {
+  const _SwitchThemeAdaptation();
+
+  @override
+  SwitchThemeData adapt(ThemeData theme, SwitchThemeData defaultValue) => const SwitchThemeData();
+}
+
 // Hand coded defaults based on Material Design 2.
 class _SwitchConfigM2 with _SwitchConfig {
     _SwitchConfigM2();
@@ -2136,132 +2265,3 @@ class _SwitchConfigM3 with _SwitchConfig {
 }
 
 // END GENERATED TOKEN PROPERTIES - Switch
-
-// Hand coded defaults for iOS/macOS Switch
-class _SwitchDefaultsCupertino extends SwitchThemeData {
-  const _SwitchDefaultsCupertino(this.context);
-
-  final BuildContext context;
-
-  @override
-  MaterialStateProperty<MouseCursor?> get mouseCursor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        return SystemMouseCursors.basic;
-      }
-      return kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic;
-    });
-  }
-
-  @override
-  MaterialStateProperty<Color> get thumbColor => const MaterialStatePropertyAll<Color>(Colors.white);
-
-  @override
-  MaterialStateProperty<Color> get trackColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
-        return CupertinoDynamicColor.resolve(CupertinoColors.systemGreen, context);
-      }
-      return CupertinoDynamicColor.resolve(CupertinoColors.secondarySystemFill, context);
-    });
-  }
-
-  @override
-  MaterialStateProperty<Color?> get trackOutlineColor => const MaterialStatePropertyAll<Color>(Colors.transparent);
-
-  @override
-  MaterialStateProperty<Color?> get overlayColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.focused)) {
-        return HSLColor
-          .fromColor(CupertinoDynamicColor.resolve(CupertinoColors.systemGreen, context).withOpacity(0.80))
-          .withLightness(0.69).withSaturation(0.835)
-          .toColor();
-      }
-      return Colors.transparent;
-    });
-  }
-
-  @override
-  double get splashRadius => 0.0;
-}
-
-const double _kCupertinoFocusTrackOutline = 3.5;
-
-class _SwitchConfigCupertino with _SwitchConfig {
-  _SwitchConfigCupertino(this.context)
-    : _colors = Theme.of(context).colorScheme;
-
-  BuildContext context;
-  final ColorScheme _colors;
-
-  @override
-  MaterialStateProperty<Color> get iconColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        return _colors.onSurface.withOpacity(0.38);
-      }
-      return _colors.onPrimaryContainer;
-    });
-  }
-
-  @override
-  double get activeThumbRadius => 14.0;
-
-  @override
-  double get inactiveThumbRadius => 14.0;
-
-  @override
-  double get pressedThumbRadius => 14.0;
-
-  @override
-  double get switchHeight => _kSwitchMinSize + 8.0;
-
-  @override
-  double get switchHeightCollapsed => _kSwitchMinSize;
-
-  @override
-  double get switchWidth => 60.0;
-
-  @override
-  double get thumbRadiusWithIcon => 14.0;
-
-  @override
-  List<BoxShadow>? get thumbShadow => const <BoxShadow> [
-    BoxShadow(
-      color: Color(0x26000000),
-      offset: Offset(0, 3),
-      blurRadius: 8.0,
-    ),
-    BoxShadow(
-      color: Color(0x0F000000),
-      offset: Offset(0, 3),
-      blurRadius: 1.0,
-    ),
-  ];
-
-  @override
-  double get trackHeight => 31.0;
-
-  @override
-  double get trackWidth => 51.0;
-
-  // The thumb size at the middle of the track. Hand coded default based on the animation specs.
-  @override
-  Size get transitionalThumbSize => const Size(28.0, 28.0);
-
-  // Hand coded default by comparing with [CupertinoSwitch].
-  @override
-  int get toggleDuration => 140;
-
-  // Hand coded default based on the animation specs.
-  @override
-  double? get thumbOffset => null;
-}
-
-class _SwitchThemeAdaptation extends Adaptation<SwitchThemeData> {
-  const _SwitchThemeAdaptation();
-
-  @override
-  SwitchThemeData adapt(ThemeData theme, SwitchThemeData defaultValue) => const SwitchThemeData();
-}
