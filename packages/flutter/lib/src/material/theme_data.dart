@@ -898,7 +898,17 @@ class ThemeData with Diagnosticable {
   ///
   T adaptive<T>(T defaultValue) {
     final Adaptation<T>? adaptation = adaptationMap[T] as Adaptation<T>?;
-    return adaptation == null ? defaultValue : adaptation.adapt(this, defaultValue);
+
+    switch (platform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        return defaultValue;
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        return adaptation?.adapt(this, defaultValue) ?? defaultValue;
+    }
   }
 
   static Map<Type, Adaptation<Object>> _updateAdaptationMap(Iterable<Adaptation<Object>> adaptations) {

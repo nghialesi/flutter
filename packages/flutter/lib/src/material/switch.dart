@@ -558,22 +558,10 @@ class Switch extends StatelessWidget {
   Size _getSwitchSize(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     SwitchThemeData switchTheme = SwitchTheme.of(context);
-    final _SwitchConfig switchConfig = theme.useMaterial3 ? _SwitchConfigM3(context) : _SwitchConfigM2();
-    switch (_switchType) {
-      case _SwitchType.material:
-        break;
-      case _SwitchType.adaptive:
-        switch (theme.platform) {
-          case TargetPlatform.android:
-          case TargetPlatform.fuchsia:
-          case TargetPlatform.linux:
-          case TargetPlatform.windows:
-            break;
-          case TargetPlatform.iOS:
-          case TargetPlatform.macOS:
-            switchTheme = theme.adaptive(switchTheme);
-        }
+    if (_switchType == _SwitchType.adaptive) {
+      switchTheme = theme.adaptive(switchTheme);
     }
+    final _SwitchConfig switchConfig = theme.useMaterial3 ? _SwitchConfigM3(context) : _SwitchConfigM2();
 
     final MaterialTapTargetSize effectiveMaterialTapTargetSize = materialTapTargetSize
       ?? switchTheme.materialTapTargetSize
@@ -883,6 +871,7 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
         switchConfig = theme.useMaterial3 ? _SwitchConfigM3(context) : _SwitchConfigM2();
         defaults = theme.useMaterial3 ? _SwitchDefaultsM3(context) : _SwitchDefaultsM2(context);
       case _SwitchType.adaptive:
+        switchTheme = theme.adaptive(switchTheme);
         switch (theme.platform) {
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
@@ -893,7 +882,6 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
           case TargetPlatform.iOS:
           case TargetPlatform.macOS:
             isCupertino = true;
-            switchTheme = theme.adaptive(switchTheme);
             applyCupertinoTheme = widget.applyCupertinoTheme
               ?? theme.cupertinoOverrideTheme?.applyThemeToAll
               ?? false;
