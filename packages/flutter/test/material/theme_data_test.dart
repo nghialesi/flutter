@@ -1404,3 +1404,4 @@ class StringAdaptation extends Adaptation<String> {
   String adapt(ThemeData theme, String defaultValue) => 'Adaptive theme.';
 }
 
+
