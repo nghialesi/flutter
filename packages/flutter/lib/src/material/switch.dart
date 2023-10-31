@@ -139,6 +139,17 @@ class Switch extends StatelessWidget {
   /// graphics expected on iOS. On other platforms, this creates a Material
   /// design [Switch].
   ///
+  /// To customize iOS/macOS switch theme, create a subclass for [Adaptation]
+  /// which overrides [Adaptation.adapt] method, and put an object of this subclass
+  /// to [ThemeData.adaptations].
+  ///
+  /// {@tool dartpad}
+  /// This sample shows how to create and use subclasses of [Adaptation] that
+  /// defines adaptive [SwitchThemeData]s.
+  ///
+  /// ** See code in examples/api/lib/material/switch/switch.4.dart **
+  /// {@end-tool}
+  ///
   /// The target platform is based on the current [Theme]: [ThemeData.platform].
   const Switch.adaptive({
     super.key,

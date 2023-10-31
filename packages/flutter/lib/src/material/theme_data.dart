@@ -73,15 +73,26 @@ export 'package:flutter/services.dart' show Brightness;
 // Examples can assume:
 // late BuildContext context;
 
+/// Defines custom adaptations to a [ThemeData] object.
 ///
+/// This is typically used for adaptive themes, but this can be used to adapt any
+/// type of objects. For example, [Switch.adaptive] method produces "cupertino"
+/// [Switch]es on macOS/iOS, and M3 [Switch]es on other platforms. To avoid being
+/// affected by a material-style theme data, [Adaptation] can be used to adapt
+/// the theme data.
 class Adaptation<T> {
-  ///
+  /// Creates an [Adaptation] constructor.
   const Adaptation();
 
-  ///
+  /// The adaptation's type.
   Type get type => T;
 
+  /// Creates adaptive value which has the same type with the default value.
   ///
+  /// For example, if the type of the defaultValue is [SwitchThemeData], overriding
+  /// this method creates an adaptive [SwitchThemeData].
+  ///
+  /// By default, this returns the default value.
   T adapt(ThemeData theme, T defaultValue) => defaultValue;
 }
 
@@ -985,10 +996,15 @@ class ThemeData with Diagnosticable {
   /// See [extensions] for an interactive example.
   T? extension<T>() => extensions[T] as T?;
 
+  /// A map which contains the adaptations for the theme. The entry's key is the
+  /// type of the adaptation; the value is the adaptation itself.
   ///
+  /// To obtain an adaptation, use [adaptation].
   final Map<Type, Adaptation<Object>> adaptationMap;
 
+  /// Used to obtain a particular [Adaptation] from [adaptationMap].
   ///
+  /// To get an adaptation, use `Theme.of(context).adaptation<MyAdaptation>()`.
   Adaptation<T>? adaptation<T>() => adaptationMap[T] as Adaptation<T>?;
 
   /// The default [InputDecoration] values for [InputDecorator], [TextField],
