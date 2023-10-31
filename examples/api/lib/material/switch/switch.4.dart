@@ -125,7 +125,7 @@ class _SwitchThemeAdaptation extends Adaptation<SwitchThemeData> {
       if (states.contains(MaterialState.selected)) {
         return Colors.yellow;
       }
-      return null;
+      return null; // Use the default.
     }),
     trackColor: const MaterialStatePropertyAll<Color>(Colors.brown),
   );

@@ -1403,5 +1403,3 @@ class StringAdaptation extends Adaptation<String> {
   @override
   String adapt(ThemeData theme, String defaultValue) => 'Adaptive theme.';
 }
-
-

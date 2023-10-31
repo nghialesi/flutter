@@ -73,26 +73,29 @@ export 'package:flutter/services.dart' show Brightness;
 // Examples can assume:
 // late BuildContext context;
 
-/// Defines custom adaptations to a [ThemeData] object.
+/// Defines a customized theme for components with an `adaptive` factory constructor.
 ///
-/// This is typically used for adaptive themes, but this can be used to adapt any
-/// type of objects. For example, [Switch.adaptive] method produces "cupertino"
-/// [Switch]es on macOS/iOS, and M3 [Switch]es on other platforms. To avoid being
-/// affected by a material-style theme data, [Adaptation] can be used to adapt
-/// the theme data.
+/// Currently, only [Switch.adaptive] supports this class.
 class Adaptation<T> {
-  /// Creates an [Adaptation] constructor.
+  /// Creates an [Adaptation].
   const Adaptation();
 
   /// The adaptation's type.
   Type get type => T;
 
-  /// Creates adaptive value which has the same type with the default value.
+  /// Typically, this is overridden to return a custom ThemeData class instead
+  /// of the defaultValue.
   ///
-  /// For example, if the type of the defaultValue is [SwitchThemeData], overriding
-  /// this method creates an adaptive [SwitchThemeData].
+  /// Adaptive factory constructors that support adaptations - currently only
+  /// [Switch.adaptive] - look for a [ThemeData.adaptations] member of the expected
+  /// type when computing their effective default component theme.
   ///
-  /// By default, this returns the default value.
+  /// {@tool dartpad}
+  /// This sample shows how to create and use subclasses of [Adaptation] that
+  /// defines adaptive [SwitchThemeData]s.
+  ///
+  /// ** See code in examples/api/lib/material/switch/switch.4.dart **
+  /// {@end-tool}
   T adapt(ThemeData theme, T defaultValue) => defaultValue;
 }
 
