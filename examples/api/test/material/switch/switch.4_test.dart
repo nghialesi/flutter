@@ -12,8 +12,8 @@ void main() {
       const example.SwitchApp(),
     );
 
-    expect(find.text('iOS'), findsOneWidget);
-    expect(find.text('android'), findsOneWidget);
+    expect(find.text('Cupertino'), findsOneWidget);
+    expect(find.text('Material'), findsOneWidget);
 
     final Finder iOSSwitch = find.byType(Switch).first;
     expect(
