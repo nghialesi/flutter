@@ -30,30 +30,30 @@ class _SwitchAppState extends State<SwitchApp> {
       home: Scaffold(
         appBar: AppBar(title: const Text('Adaptive Switches')),
         body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          OutlinedButton(
-            onPressed: () {
-              setState(() {
-                isMaterial = !isMaterial;
-              });
-            },
-            child: isMaterial ? const Text('Show cupertino style') : const Text('Show material style'),
-          ),
-          const SizedBox(height: 20),
-          const SwitchWithLabel(label: 'enabled', enabled: true),
-          const SwitchWithLabel(label: 'disabled', enabled: false),
-          Theme(
-            data: theme.copyWith(
-              adaptations: <Adaptation<Object>>[ const _SwitchThemeAdaptation() ],
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            OutlinedButton(
+              onPressed: () {
+                setState(() {
+                  isMaterial = !isMaterial;
+                });
+              },
+              child: isMaterial ? const Text('Show cupertino style') : const Text('Show material style'),
             ),
-            child: const SwitchWithLabel(
-              label: 'customization for cupertino only',
-              enabled: true,
+            const SizedBox(height: 20),
+            const SwitchWithLabel(label: 'enabled', enabled: true),
+            const SwitchWithLabel(label: 'disabled', enabled: false),
+            Theme(
+              data: theme.copyWith(
+                adaptations: <Adaptation<Object>>[ const _SwitchThemeAdaptation() ],
+              ),
+              child: const SwitchWithLabel(
+                label: 'customization for cupertino only',
+                enabled: true,
+              ),
             ),
-          ),
-        ],
-                ),
+          ],
+        ),
       ),
     );
   }
