@@ -24,7 +24,7 @@ void main() {
         ..rrect()
         ..rrect(color: Colors.white), // Thumb color
     );
-    
+
     await tester.tap(find.byType(OutlinedButton));
     await tester.pumpAndSettle();
 
