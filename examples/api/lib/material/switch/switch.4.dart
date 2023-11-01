@@ -20,8 +20,8 @@ class SwitchApp extends StatelessWidget {
           child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            AdaptiveSwitches(platform: TargetPlatform.iOS, ),
-            SizedBox(width: 20,),
+            AdaptiveSwitches(platform: TargetPlatform.iOS),
+            SizedBox(width: 20),
             AdaptiveSwitches(platform: TargetPlatform.android),
           ],
         ),
@@ -66,7 +66,9 @@ class _AdaptiveSwitchesState extends State<AdaptiveSwitches> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: <Widget>[
-          Text(widget.platform == TargetPlatform.iOS ? 'Cupertino' : 'Material', style: const TextStyle(fontWeight: FontWeight.w600)),
+          Text(widget.platform == TargetPlatform.iOS? 'Cupertino' : 'Material',
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          ),
           Row(
             children: <Widget>[
               label('enabled'),
