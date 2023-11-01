@@ -12,35 +12,37 @@ void main() {
       const example.SwitchApp(),
     );
 
-    expect(find.text('Cupertino'), findsOneWidget);
-    expect(find.text('Material'), findsOneWidget);
+    // Default is material style switches
+    expect(find.text('Show cupertino style'), findsOneWidget);
+    expect(find.text('Show material style'), findsNothing);
 
-    final Finder iOSSwitch = find.byType(Switch).first;
+    final Finder adaptiveSwitch = find.byType(Switch).first;
     expect(
-      iOSSwitch,
+      adaptiveSwitch,
+      paints
+        ..rrect(color: const Color(0xff6750a4)) // M3 primary color.
+        ..rrect()
+        ..rrect(color: Colors.white), // Thumb color
+    );
+    
+    await tester.tap(find.byType(OutlinedButton));
+    await tester.pumpAndSettle();
+
+    expect(
+      adaptiveSwitch,
       paints
         ..rrect(color: const Color(0xff34c759)) // Cupertino system green.
         ..rrect()..rrect()..rrect()..rrect()
         ..rrect(color: Colors.white), // Thumb color
     );
 
-    final Finder iOSSwitchWithCustomization = find.byType(Switch).at(2);
+    final Finder customCupertinoSwitch = find.byType(Switch).at(2);
     expect(
-      iOSSwitchWithCustomization,
+      customCupertinoSwitch,
       paints
         ..rrect(color: const Color(0xff795548)) // Customized track color only for cupertino.
         ..rrect()..rrect()..rrect()..rrect()
         ..rrect(color: const Color(0xffffeb3b)), // Customized thumb color only for cupertino.
-    );
-
-    // Switch.adaptive on android platform still provides M3 switch.
-    final Finder androidSwitch = find.byType(Switch).at(3); // The first switch on the second column.
-    expect(
-      androidSwitch,
-      paints
-        ..rrect(color: const Color(0xff6750a4)) // M3 primary color.
-        ..rrect()
-        ..rrect(color: Colors.white), // Thumb color
     );
   });
 }

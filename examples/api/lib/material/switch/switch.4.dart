@@ -8,111 +8,94 @@ import 'package:flutter/material.dart';
 
 void main() => runApp(const SwitchApp());
 
-class SwitchApp extends StatelessWidget {
+class SwitchApp extends StatefulWidget {
   const SwitchApp({super.key});
 
   @override
+  State<SwitchApp> createState() => _SwitchAppState();
+}
+
+class _SwitchAppState extends State<SwitchApp> {
+  bool isMaterial = true;
+  TargetPlatform platform = TargetPlatform.android;
+
+  @override
   Widget build(BuildContext context) {
+    final ThemeData theme = ThemeData(
+      platform: isMaterial ? TargetPlatform.android : TargetPlatform.iOS,
+    );
+
     return MaterialApp(
+      theme: theme,
       home: Scaffold(
         appBar: AppBar(title: const Text('Adaptive Switches')),
-        body: const Center(
-          child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            AdaptiveSwitches(platform: TargetPlatform.iOS),
-            SizedBox(width: 20),
-            AdaptiveSwitches(platform: TargetPlatform.android),
-          ],
-        ),
-        ),
+        body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          OutlinedButton(
+            onPressed: () {
+              setState(() {
+                isMaterial = !isMaterial;
+              });
+            },
+            child: isMaterial ? const Text('Show cupertino style') : const Text('Show material style'),
+          ),
+          const SizedBox(height: 20),
+          const SwitchWithLabel(label: 'enabled', enabled: true),
+          const SwitchWithLabel(label: 'disabled', enabled: false),
+          Theme(
+            data: theme.copyWith(
+              adaptations: <Adaptation<Object>>[ const _SwitchThemeAdaptation() ],
+            ),
+            child: const SwitchWithLabel(
+              label: 'customization for cupertino only',
+              enabled: true,
+            ),
+          ),
+        ],
+                ),
       ),
     );
   }
 }
 
-class AdaptiveSwitches extends StatefulWidget {
-  const AdaptiveSwitches({
+class SwitchWithLabel extends StatefulWidget {
+  const SwitchWithLabel({
     super.key,
-    required this.platform
+    required this.enabled,
+    required this.label,
   });
 
-  final TargetPlatform platform;
+  final bool enabled;
+  final String label;
 
   @override
-  State<AdaptiveSwitches> createState() => _AdaptiveSwitchesState();
+  State<SwitchWithLabel> createState() => _SwitchWithLabelState();
 }
 
-class _AdaptiveSwitchesState extends State<AdaptiveSwitches> {
+class _SwitchWithLabelState extends State<SwitchWithLabel> {
   bool active = true;
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context).copyWith(
-      platform: widget.platform,
-    );
-
-    Widget label(String switchLabel) {
-      return widget.platform == TargetPlatform.iOS
-        ? Padding(
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Container(
+          width: 150,
           padding: const EdgeInsets.only(right: 20),
-          child: Text(switchLabel))
-        : const Text('');
-    }
-
-    return Theme(
-      data: theme,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: <Widget>[
-          Text(widget.platform == TargetPlatform.iOS? 'Cupertino' : 'Material',
-            style: const TextStyle(fontWeight: FontWeight.w600),
-          ),
-          Row(
-            children: <Widget>[
-              label('enabled'),
-              Switch.adaptive(
-                value: active,
-                onChanged: (bool value) {
-                  setState(() {
-                    active = value;
-                  });
-                },
-              ),
-            ],
-          ),
-          Row(
-            children: <Widget>[
-              label('disabled'),
-              Switch.adaptive(
-                value: active,
-                onChanged: null,
-              ),
-            ],
-          ),
-          Row(
-            children: <Widget>[
-              label('customization'),
-              Theme(
-                data: theme.copyWith(
-                  adaptations: <Adaptation<Object>>[
-                    const _SwitchThemeAdaptation()
-                  ]
-                ),
-                child: Switch.adaptive(
-                  value: active,
-                  onChanged: (bool value) {
-                    setState(() {
-                      active = value;
-                    });
-                  },
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+          child: Text(widget.label)
+        ),
+        Switch.adaptive(
+          value: active,
+          onChanged: widget.enabled ?
+            (bool value) {
+              setState(() {
+                active = value;
+              });
+            } : null,
+        ),
+      ],
     );
   }
 }
