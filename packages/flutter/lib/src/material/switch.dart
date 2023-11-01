@@ -253,7 +253,6 @@ class Switch extends StatelessWidget {
   /// {@template flutter.material.switch.activeThumbImage}
   /// An image to use on the thumb of this switch when the switch is on.
   /// {@endtemplate}
-  ///
   final ImageProvider? activeThumbImage;
 
   /// {@template flutter.material.switch.onActiveThumbImageError}
@@ -265,7 +264,6 @@ class Switch extends StatelessWidget {
   /// {@template flutter.material.switch.inactiveThumbImage}
   /// An image to use on the thumb of this switch when the switch is off.
   /// {@endtemplate}
-  ///
   final ImageProvider? inactiveThumbImage;
 
   /// {@template flutter.material.switch.onInactiveThumbImageError}
